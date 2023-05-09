@@ -20,3 +20,4 @@ void loop() {
   servo.write(180);  // サーボを180°の位置に動かす
   delay(1000);
  
+}
