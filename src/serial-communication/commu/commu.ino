@@ -162,6 +162,9 @@ void loop() {
 
   if (Serial.available() > 0) {
     Serial.readBytes(data, BUFFER_SIZE);
+    for (i=0; i<LINE_ELEMENTS; i++){
+    Serial.print(data[i]);
+    }
     Drive(data[0], data[1]);
     Inhale(data[2]);
     Arm(data[3]);
