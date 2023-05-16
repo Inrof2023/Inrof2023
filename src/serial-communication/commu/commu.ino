@@ -40,15 +40,53 @@ void rotateMotorByStepsInDirection(Direction dir, int steps) {
     case Direction::Forward:
       digitalWrite(DIR_L, LOW);
       digitalWrite(DIR_R, HIGH);
+      // モータをステップ数steps回だけ回転させる（200ステップで一周）
+      for (int i = 0; i < steps; i++ ){
+        digitalWrite(STEP_L, HIGH);
+        delayMicroseconds(20000);
+        digitalWrite(STEP_L, LOW);
+        delayMicroseconds(20000);
+
+        digitalWrite(STEP_R, HIGH);
+        delayMicroseconds(20000);
+        digitalWrite(STEP_R, LOW);
+        delayMicroseconds(20000);
+      }
     case Direction::Backward:
       digitalWrite(DIR_L, HIGH);
       digitalWrite(DIR_R, LOW);
+      // モータをステップ数steps回だけ回転させる（200ステップで一周）
+      for (int i = 0; i < steps; i++ ){
+        digitalWrite(STEP_L, HIGH);
+        delayMicroseconds(20000);
+        digitalWrite(STEP_L, LOW);
+        delayMicroseconds(20000);
+
+        digitalWrite(STEP_R, HIGH);
+        delayMicroseconds(20000);
+        digitalWrite(STEP_R, LOW);
+        delayMicroseconds(20000);
+      }
     case Direction::Leftward:
       digitalWrite(DIR_L, LOW);
-      digitalWrite(DIR_R, LOW);
-    case Direction::Rightward:
-      digitalWrite(DIR_L, HIGH);
       digitalWrite(DIR_R, HIGH);
+      // モータをステップ数steps回だけ回転させる（200ステップで一周）
+      for (int i = 0; i < steps; i++ ){
+        digitalWrite(STEP_L, HIGH);
+        delayMicroseconds(20000);
+        digitalWrite(STEP_L, LOW);
+        delayMicroseconds(20000);
+      }
+    case Direction::Rightward:
+      digitalWrite(DIR_L, LOW);
+      digitalWrite(DIR_R, HIGH);
+      // モータをステップ数steps回だけ回転させる（200ステップで一周）
+      for (int i = 0; i < steps; i++ ){
+        digitalWrite(STEP_R, HIGH);
+        delayMicroseconds(20000);
+        digitalWrite(STEP_R, LOW);
+        delayMicroseconds(20000);
+      }
   }
 
   // モータをステップ数steps回だけ回転させる（200ステップで一周）
