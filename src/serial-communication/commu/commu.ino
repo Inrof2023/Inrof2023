@@ -8,6 +8,7 @@ const int LEFT = A0;
 const int SENTER_L = A1;
 const int SENTER_R = A2;
 const int RIGHT = A3;
+
 //100以上を白とみなす
 const int THRESHOLD = 100;
 int line_array[4];
@@ -25,12 +26,18 @@ const int STEP_L = 5;
 const int DIR_R = 6;
 const int STEP_R = 7;
 
+//受信データ格納
+const int BUFFER_SIZE = 1;
+byte data[BUFFER_SIZE];
+
 enum class Direction {
   Forward,
   Backward,
   Leftward,
   Rightward
 };
+
+// ステッピングモータ関係の関数
 
 // 指定された向き（前進または後退）ステップ数だけ回す
 void rotateMotorByStepsInDirection(Direction dir, int steps) {
@@ -127,10 +134,6 @@ void rotateMotorRightwardBySteps(int steps) {
   rotateMotorByStepsInDirection(Direction::Rightward, steps);
 }
 
-//受信データ格納
-const int BUFFER_SIZE = 10;
-byte data[BUFFER_SIZE];
-
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
@@ -145,31 +148,6 @@ void setup() {
   pinMode(STEP_R, OUTPUT);
   digitalWrite(DIR_R, LOW);
   digitalWrite(STEP_R, LOW);
-}
-
-void loop() {
-  // put your main code here, to run repeatedly:
-  line_array[0] = analogRead(LEFT);
-  line_array[1] = analogRead(SENTER_L);
-  line_array[2] = analogRead(SENTER_R);
-  line_array[3] = analogRead(RIGHT);
-  int i = 0;
-  for (i = 0; i < LINE_ELEMENTS - 1; i++) {
-    Serial.print(line_array[i]);
-    Serial.print(",");
-  }
-  Serial.println(line_array[i]);
-
-  while (Serial.available() <= 0) {
-  }
-  Serial.readBytes(data, BUFFER_SIZE);
-  Serial.print(data[0]);
-  Serial.print(data[1]);
-  Serial.print(data[2]);
-  Serial.print(data[3]);
-  Drive(data[0], data[1]);
-  Inhale(data[2]);
-  Arm(data[3]);
 }
 
 void Drive(bool b0, bool b1) {
@@ -189,6 +167,35 @@ void Drive(bool b0, bool b1) {
   if (b0 & b1) {
     rotateMotorRightwardBySteps(100);
   }
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+
+  // ここを関数readPhotoReflectorValueにまとめる
+  line_array[0] = analogRead(LEFT);
+  line_array[1] = analogRead(SENTER_L);
+  line_array[2] = analogRead(SENTER_R);
+  line_array[3] = analogRead(RIGHT);
+
+  int i = 0;
+  // ここを関数sendSignalToRaspberryPiにまとめる
+  for (i = 0; i < LINE_ELEMENTS - 1; i++) {
+    Serial.print(line_array[i]);
+    Serial.print(",");
+  }
+  Serial.println(line_array[i]);
+
+  // ここを関数receiveSignalFromRaspberryPiにまとめる
+  if(Serial.available() > 0){ 
+      Serial.readBytes(data, BUFFER_SIZE);
+   }
+  
+  // ここビット単位なので注意が必要
+  // まずは1byteのデータから当該箇所のビット列を取り出す関数extractBitFromByteが必要
+  Drive(data[0], data[1]);
+  Inhale(data[2]);
+  Arm(data[3]);
 }
 
 //DC motorによる吸い込み
