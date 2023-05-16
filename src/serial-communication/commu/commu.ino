@@ -26,7 +26,7 @@ const int DIR_R = 6;
 const int STEP_R = 7;
 
 enum class Direction {
-  Forward, 
+  Forward,
   Backward,
   Leftward,
   Rightward
@@ -41,7 +41,7 @@ void rotateMotorByStepsInDirection(Direction dir, int steps) {
       digitalWrite(DIR_L, LOW);
       digitalWrite(DIR_R, HIGH);
       // モータをステップ数steps回だけ回転させる（200ステップで一周）
-      for (int i = 0; i < steps; i++ ){
+      for (int i = 0; i < steps; i++) {
         digitalWrite(STEP_L, HIGH);
         delayMicroseconds(20000);
         digitalWrite(STEP_L, LOW);
@@ -56,7 +56,7 @@ void rotateMotorByStepsInDirection(Direction dir, int steps) {
       digitalWrite(DIR_L, HIGH);
       digitalWrite(DIR_R, LOW);
       // モータをステップ数steps回だけ回転させる（200ステップで一周）
-      for (int i = 0; i < steps; i++ ){
+      for (int i = 0; i < steps; i++) {
         digitalWrite(STEP_L, HIGH);
         delayMicroseconds(20000);
         digitalWrite(STEP_L, LOW);
@@ -71,7 +71,7 @@ void rotateMotorByStepsInDirection(Direction dir, int steps) {
       digitalWrite(DIR_L, LOW);
       digitalWrite(DIR_R, HIGH);
       // モータをステップ数steps回だけ回転させる（200ステップで一周）
-      for (int i = 0; i < steps; i++ ){
+      for (int i = 0; i < steps; i++) {
         digitalWrite(STEP_L, HIGH);
         delayMicroseconds(20000);
         digitalWrite(STEP_L, LOW);
@@ -81,7 +81,7 @@ void rotateMotorByStepsInDirection(Direction dir, int steps) {
       digitalWrite(DIR_L, LOW);
       digitalWrite(DIR_R, HIGH);
       // モータをステップ数steps回だけ回転させる（200ステップで一周）
-      for (int i = 0; i < steps; i++ ){
+      for (int i = 0; i < steps; i++) {
         digitalWrite(STEP_R, HIGH);
         delayMicroseconds(20000);
         digitalWrite(STEP_R, LOW);
@@ -90,7 +90,7 @@ void rotateMotorByStepsInDirection(Direction dir, int steps) {
   }
 
   // モータをステップ数steps回だけ回転させる（200ステップで一周）
-  for (int i = 0; i < steps; i++ ){
+  for (int i = 0; i < steps; i++) {
     digitalWrite(STEP_L, HIGH);
     delayMicroseconds(20000);
     digitalWrite(STEP_L, LOW);
@@ -128,7 +128,7 @@ void rotateMotorRightwardBySteps(int steps) {
 }
 
 //受信データ格納
-const int BUFFER_SIZE = 4;
+const int BUFFER_SIZE = 10;
 byte data[BUFFER_SIZE];
 
 void setup() {
@@ -153,39 +153,40 @@ void loop() {
   line_array[1] = analogRead(SENTER_L);
   line_array[2] = analogRead(SENTER_R);
   line_array[3] = analogRead(RIGHT);
-  int i=0;
-  for (i=0; i<LINE_ELEMENTS-1; i++){
+  int i = 0;
+  for (i = 0; i < LINE_ELEMENTS - 1; i++) {
     Serial.print(line_array[i]);
     Serial.print(",");
   }
   Serial.println(line_array[i]);
 
-  if (Serial.available() > 0) {
-    Serial.readBytes(data, BUFFER_SIZE);
-    for (i=0; i<LINE_ELEMENTS; i++){
-    Serial.print(data[i]);
-    }
-    Drive(data[0], data[1]);
-    Inhale(data[2]);
-    Arm(data[3]);
+  while (Serial.available() <= 0) {
   }
+  Serial.readBytes(data, BUFFER_SIZE);
+  Serial.print(data[0]);
+  Serial.print(data[1]);
+  Serial.print(data[2]);
+  Serial.print(data[3]);
+  Drive(data[0], data[1]);
+  Inhale(data[2]);
+  Arm(data[3]);
 }
 
 void Drive(bool b0, bool b1) {
   //直進
-  if(!b0 & !b1){
+  if (!b0 & !b1) {
     rotateMotorForwardBySteps(100);
   }
   //後進
-  if(!b0 & b1){
+  if (!b0 & b1) {
     rotateMotorBackwardBySteps(100);
   }
   //左旋回
-  if(b0 & !b1){
+  if (b0 & !b1) {
     rotateMotorLeftwardBySteps(100);
   }
   //右旋回
-  if(b0 & b1){
+  if (b0 & b1) {
     rotateMotorRightwardBySteps(100);
   }
 }
