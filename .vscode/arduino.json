@@ -1,3 +1,6 @@
 {
-    "board": "arduino:avr:nano"
+    "board": "arduino:avr:nano",
+    "sketch": "src/serial-communication/commu/commu.ino",
+    "configuration": "cpu=atmega328old",
+    "port": "/dev/tty.usbserial-1110"
 }
