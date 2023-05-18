@@ -13,11 +13,17 @@
 // バッファサイズ
 #define BUFFER_SIZE 1
 
+enum class Motor {
+    STEPPING,
+    SERVO,
+    DC
+};
 
-class CommunicationRepository {
+class CommunicationService {
     public:
         void send(int* line);
-        void receive();
+        int receive(); // 受け取った1byteのデータを返す
+        // int getMotorDataFromByte(Motor motor, char serial_data);
 };
 
 #endif // _COMMUNICATION_REPOSITORY_

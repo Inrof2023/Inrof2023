@@ -92,3 +92,23 @@ void SteppingMotor::rotateMotorLeftwardBySteps(int steps) {
 void SteppingMotor::rotateMotorRightwardBySteps(int steps) {
   SteppingMotor::rotateMotorByStepsInDirection(Direction::RIGHTWORD, steps);
 }
+
+// void SteppingMotor::moveStepperMotor(int sirial_data, int steps) {
+//   switch (sirial_data)
+//   {
+//   case 0b000: // 停止
+//     break;
+//   case 0b001: // 前進
+//     SteppingMotor::rotateMotorForwardBySteps(steps);
+//     break;
+//   case 0b010: // 後退
+//     SteppingMotor::rotateMotorBackwardBySteps(steps);
+//     break;
+//   case 0b011: // 左回り
+//     SteppingMotor::rotateMotorLeftwardBySteps(steps);
+//     break;
+//   case 0b100: // 右回り
+//     SteppingMotor::rotateMotorRightwardBySteps(steps);
+//     break;
+//   }
+// }
