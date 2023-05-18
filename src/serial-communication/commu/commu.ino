@@ -173,10 +173,10 @@ void loop() {
   // put your main code here, to run repeatedly:
 
   // ここを関数readPhotoReflectorValueにまとめる
-  line_array[0] = analogRead(LEFT);
-  line_array[1] = analogRead(SENTER_L);
-  line_array[2] = analogRead(SENTER_R);
-  line_array[3] = analogRead(RIGHT);
+  // line_array[0] = analogRead(LEFT);
+  // line_array[1] = analogRead(SENTER_L);
+  // line_array[2] = analogRead(SENTER_R);
+  // line_array[3] = analogRead(RIGHT);
 
   int i = 0;
   // ここを関数sendSignalToRaspberryPiにまとめる
@@ -193,9 +193,9 @@ void loop() {
   
   // ここビット単位なので注意が必要
   // まずは1byteのデータから当該箇所のビット列を取り出す関数extractBitFromByteが必要
-  Drive(data[0], data[1]);
-  Inhale(data[2]);
-  Arm(data[3]);
+  // Drive(data[0], data[1]);
+  // Inhale(data[2]);
+  // Arm(data[3]);
 }
 
 //DC motorによる吸い込み

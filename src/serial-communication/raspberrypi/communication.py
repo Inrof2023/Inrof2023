@@ -61,7 +61,7 @@ def communicate_with_arduino() -> None:
         ###################
         DC_BIT = 0b1
         SERV_BIT = 0b1
-        STEP_BIT = 0b01
+        STEP_BIT = 0b001
         ###################
         serial_byte = concatenate_bit_sequences(DC_BIT, SERV_BIT, STEP_BIT)
         
@@ -116,7 +116,7 @@ class TestCommunication(unittest.TestCase):
 if __name__ == '__main__':
     # シリアル通信用のポートを環境変数に設定
     os.environ['SERIAL_PORT'] = '/dev/ttyUSB0'
-    os.environ['BITRATE'] = '115200'
+    os.environ['BITRATE'] = '9600'
     
     # 単体テスト
     unittest.main()
