@@ -16,7 +16,7 @@
 class CommunicationService {
     public:
         void send(int* line);
-        int receive(); // 受け取った1byteのデータを返す
+        char receive(); // 受け取った1byteのデータを返す
         // int getMotorDataFromByte(Motor motor, char serial_data);
 };
 
