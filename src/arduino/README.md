@@ -28,21 +28,18 @@ D3
 インストール自体は普通にする.
 下の画面に`Select Board Type`と出るからこれをクリックしてBoard用のドライバをインストールする.（多分一番上をえらべばOK）. Processorを`Old Bootloader`に変更するのを忘れずに.
 
-## settings.jsonにIDEのパスなどを記載する
-ネットと違ってIDEのファイル名が違うので注意する.（キレそう）
+## ardiuno-cliのインストール
+最新版ではVSCodeでIDEを引っ張って来れない. cliをインストールしてそれのパスを通せと怒られるから注意.（割と最近なったみたいだkらネットにこの情報がなかった.）下のコマンドを実行する.（実行するときは`$`を消すことを忘れないように）
 ```
-"arduino.analyzeOnOpen": true,
-"arduino.analyzeOnSettingChange": true,
-"arduino.clearOutputOnBuild": false,
-"arduino.defaultBaudRate": 9600,
-"arduino.disableIntelliSenseAutoGen": false,
-"arduino.disableTestingOpen": false,
-"arduino.enableUSBDetection": true,
-"arduino.logLevel": "info",
-"arduino.openPDEFiletype": false,
-"arduino.skipHeaderProvider": false,
-"arduino.useArduinoCli": true,
-"C_Cpp.intelliSenseEngine": "Tag Parser"
+$ wget http://downloads.arduino.cc/arduino-cli/arduino-cli-0.2.1-alpha.preview-linuxarm.tar.bz2
+$ tar xf arduino-cli*
+$ mv arduino-cli-0.2.1-alpha.preview-linuxarm arduino-cli
+$ sudo mv arduino-cli /usr/local/bin
+$ rm -rf arduino-cli-0.2.1-alpha.preview-linuxarm.tar.bz2 
+```
+ardiuno-cliで使うライブラリをインストール
+```
+arduino-cli lib install Servo
 ```
 
 ## includeパスの設定

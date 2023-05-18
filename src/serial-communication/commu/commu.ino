@@ -1,13 +1,21 @@
 #include <Servo.h>
+// #include "constants.hpp"
+// #include "stepping_motor.hpp"
+#include "motor_service.hpp"
+#include "communication_service.hpp"
+#include "motor_service.hpp"
 Servo servo;
 
-//フォトリフレクタ
-const int LINE_ELEMENTS = 4;
+using namespace std;
 
-const int LEFT = A0;
-const int SENTER_L = A1;
-const int SENTER_R = A2;
-const int RIGHT = A3;
+//フォトリフレクタ
+// const int LINE_ELEMENTS = 4;
+
+// const int LEFT = A0;
+// const int SENTER_L = A1;
+// const int SENTER_R = A2;
+// const int RIGHT = A3;
+
 //100以上を白とみなす
 const int THRESHOLD = 100;
 int line_array[4];
@@ -25,34 +33,46 @@ const int STEP_L = 5;
 const int DIR_R = 6;
 const int STEP_R = 7;
 
-enum class Direction {
-  Forward,
-  Backward,
-  Leftward,
-  Rightward
+// ステッピングモータ用のクラス
+SteppingMotor stepping_motor;
+
+// 通信用のクラス
+CommunicationService communication;
+
+// モーター用のクラス
+MotorService motor_service(stepping_motor);
+
+//受信データ格納
+// const int BUFFER_SIZE = 1;
+char data[BUFFER_SIZE];
+
+// enum class Direction {
+//   FORWARD,
+//   BACKWARD,
+//   LEFTWORD,
+//   RIGHTWORD
+// };
+
+// enum class Motor {
+//   STEPPING,
+//   SERVO,
+//   DC
+// };
+
+// これ後でクラスに書き換えるからいらないかなー
+enum class SteppingSide{
+  LEFT,
+  RIGHT
 };
+
+// ステッピングモータ関係の関数
 
 // 指定された向き（前進または後退）ステップ数だけ回す
 void rotateMotorByStepsInDirection(Direction dir, int steps) {
 
   // モータが回転する方向を設定している
   switch (dir) {
-    case Direction::Forward:
-      digitalWrite(DIR_L, LOW);
-      digitalWrite(DIR_R, HIGH);
-      // モータをステップ数steps回だけ回転させる（200ステップで一周）
-      for (int i = 0; i < steps; i++) {
-        digitalWrite(STEP_L, HIGH);
-        delayMicroseconds(20000);
-        digitalWrite(STEP_L, LOW);
-        delayMicroseconds(20000);
-
-        digitalWrite(STEP_R, HIGH);
-        delayMicroseconds(20000);
-        digitalWrite(STEP_R, LOW);
-        delayMicroseconds(20000);
-      }
-    case Direction::Backward:
+    case Direction::FORWARD:
       digitalWrite(DIR_L, HIGH);
       digitalWrite(DIR_R, LOW);
       // モータをステップ数steps回だけ回転させる（200ステップで一周）
@@ -67,7 +87,24 @@ void rotateMotorByStepsInDirection(Direction dir, int steps) {
         digitalWrite(STEP_R, LOW);
         delayMicroseconds(20000);
       }
-    case Direction::Leftward:
+      break;
+    case Direction::BACKWARD:
+      digitalWrite(DIR_L, LOW);
+      digitalWrite(DIR_R, HIGH);
+      // モータをステップ数steps回だけ回転させる（200ステップで一周）
+      for (int i = 0; i < steps; i++) {
+        digitalWrite(STEP_L, HIGH);
+        delayMicroseconds(20000);
+        digitalWrite(STEP_L, LOW);
+        delayMicroseconds(20000);
+
+        digitalWrite(STEP_R, HIGH);
+        delayMicroseconds(20000);
+        digitalWrite(STEP_R, LOW);
+        delayMicroseconds(20000);
+      }
+      break;
+    case Direction::LEFTWORD:
       digitalWrite(DIR_L, LOW);
       digitalWrite(DIR_R, HIGH);
       // モータをステップ数steps回だけ回転させる（200ステップで一周）
@@ -77,7 +114,8 @@ void rotateMotorByStepsInDirection(Direction dir, int steps) {
         digitalWrite(STEP_L, LOW);
         delayMicroseconds(20000);
       }
-    case Direction::Rightward:
+      break;
+    case Direction::RIGHTWORD:
       digitalWrite(DIR_L, LOW);
       digitalWrite(DIR_R, HIGH);
       // モータをステップ数steps回だけ回転させる（200ステップで一周）
@@ -87,49 +125,33 @@ void rotateMotorByStepsInDirection(Direction dir, int steps) {
         digitalWrite(STEP_R, LOW);
         delayMicroseconds(20000);
       }
-  }
-
-  // モータをステップ数steps回だけ回転させる（200ステップで一周）
-  for (int i = 0; i < steps; i++) {
-    digitalWrite(STEP_L, HIGH);
-    delayMicroseconds(20000);
-    digitalWrite(STEP_L, LOW);
-    delayMicroseconds(20000);
-
-    digitalWrite(STEP_R, HIGH);
-    delayMicroseconds(20000);
-    digitalWrite(STEP_R, LOW);
-    delayMicroseconds(20000);
+      break;
   }
 }
 
 // 前進するようにモータをステップ数だけ回す
 // rotateMotorByStepsInDirectionのラッパー
 void rotateMotorForwardBySteps(int steps) {
-  rotateMotorByStepsInDirection(Direction::Forward, steps);
+  rotateMotorByStepsInDirection(Direction::FORWARD, steps);
 }
 
 // 後退するようにモータをステップ数だけ回す
 // rotateMotorByStepsInDirectionのラッパー
 void rotateMotorBackwardBySteps(int steps) {
-  rotateMotorByStepsInDirection(Direction::Backward, steps);
+  rotateMotorByStepsInDirection(Direction::BACKWARD, steps);
 }
 
 // 左旋回するようにモータをステップ数だけ回す
 // rotateMotorByStepsInDirectionのラッパー
 void rotateMotorLeftwardBySteps(int steps) {
-  rotateMotorByStepsInDirection(Direction::Leftward, steps);
+  rotateMotorByStepsInDirection(Direction::LEFTWORD, steps);
 }
 
 // 右旋回するようにモータをステップ数だけ回す
 // rotateMotorByStepsInDirectionのラッパー
 void rotateMotorRightwardBySteps(int steps) {
-  rotateMotorByStepsInDirection(Direction::Rightward, steps);
+  rotateMotorByStepsInDirection(Direction::RIGHTWORD, steps);
 }
-
-//受信データ格納
-const int BUFFER_SIZE = 10;
-byte data[BUFFER_SIZE];
 
 void setup() {
   // put your setup code here, to run once:
@@ -145,31 +167,7 @@ void setup() {
   pinMode(STEP_R, OUTPUT);
   digitalWrite(DIR_R, LOW);
   digitalWrite(STEP_R, LOW);
-}
 
-void loop() {
-  // put your main code here, to run repeatedly:
-  line_array[0] = analogRead(LEFT);
-  line_array[1] = analogRead(SENTER_L);
-  line_array[2] = analogRead(SENTER_R);
-  line_array[3] = analogRead(RIGHT);
-  int i = 0;
-  for (i = 0; i < LINE_ELEMENTS - 1; i++) {
-    Serial.print(line_array[i]);
-    Serial.print(",");
-  }
-  Serial.println(line_array[i]);
-
-  while (Serial.available() <= 0) {
-  }
-  Serial.readBytes(data, BUFFER_SIZE);
-  Serial.print(data[0]);
-  Serial.print(data[1]);
-  Serial.print(data[2]);
-  Serial.print(data[3]);
-  Drive(data[0], data[1]);
-  Inhale(data[2]);
-  Arm(data[3]);
 }
 
 void Drive(bool b0, bool b1) {
@@ -189,6 +187,42 @@ void Drive(bool b0, bool b1) {
   if (b0 & b1) {
     rotateMotorRightwardBySteps(100);
   }
+}
+
+void readPhotoReflectorValue(int* line_array) {
+  // int line_array[LINE_ELEMENTS];
+  line_array[0] = analogRead(LEFT);
+  line_array[1] = analogRead(SENTER_L);
+  line_array[2] = analogRead(SENTER_R);
+  line_array[3] = analogRead(RIGHT);
+  // return line_array;
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+
+  int line_array[LINE_ELEMENTS];
+  readPhotoReflectorValue(line_array);
+  communication.send(line_array);
+  char serial_data = communication.receive();
+
+  motor_service.driveMotor(serial_data); // 受け取ったデータを元にモータを動かす
+
+  // 後ろの3bitを取得する
+  // 0b00000111とAND演算する
+  // int and_data = data & 0b00000111;
+  // if (and_data == 0b00000001) {
+  //   rotateMotorForwardBySteps(10);
+  // }
+  // rotateMotorForwardBySteps(10);
+
+  
+  
+  // ここビット単位なので注意が必要
+  // まずは1byteのデータから当該箇所のビット列を取り出す関数extractBitFromByteが必要
+  // Drive(data[0], data[1]);
+  // Inhale(data[2]);
+  // Arm(data[3]);
 }
 
 //DC motorによる吸い込み
