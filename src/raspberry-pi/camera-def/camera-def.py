@@ -196,4 +196,4 @@ if __name__ == "__main__":
 
     # 終了処理
     cap.release()
-    cv2.destroyAllWindows()
+    # cv2.destroyAllWindows()   デバッグ用　ウィンドウの終了
