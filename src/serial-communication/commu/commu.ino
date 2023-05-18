@@ -1,13 +1,18 @@
 #include <Servo.h>
+// #include "constants.hpp"
+#include "stepping_motor.hpp"
+#include "communication_repository.hpp"
 Servo servo;
 
-//フォトリフレクタ
-const int LINE_ELEMENTS = 4;
+using namespace std;
 
-const int LEFT = A0;
-const int SENTER_L = A1;
-const int SENTER_R = A2;
-const int RIGHT = A3;
+//フォトリフレクタ
+// const int LINE_ELEMENTS = 4;
+
+// const int LEFT = A0;
+// const int SENTER_L = A1;
+// const int SENTER_R = A2;
+// const int RIGHT = A3;
 
 //100以上を白とみなす
 const int THRESHOLD = 100;
@@ -27,14 +32,26 @@ const int DIR_R = 6;
 const int STEP_R = 7;
 
 //受信データ格納
-const int BUFFER_SIZE = 1;
-byte data[BUFFER_SIZE];
+// const int BUFFER_SIZE = 1;
+char data[BUFFER_SIZE*2];
 
-enum class Direction {
-  Forward,
-  Backward,
-  Leftward,
-  Rightward
+// enum class Direction {
+//   FORWARD,
+//   BACKWARD,
+//   LEFTWORD,
+//   RIGHTWORD
+// };
+
+// enum class Motor {
+//   STEPPING,
+//   SERVO,
+//   DC
+// };
+
+// これ後でクラスに書き換えるからいらないかなー
+enum class SteppingSide{
+  LEFT,
+  RIGHT
 };
 
 // ステッピングモータ関係の関数
@@ -44,7 +61,7 @@ void rotateMotorByStepsInDirection(Direction dir, int steps) {
 
   // モータが回転する方向を設定している
   switch (dir) {
-    case Direction::Forward:
+    case Direction::FORWARD:
       digitalWrite(DIR_L, LOW);
       digitalWrite(DIR_R, HIGH);
       // モータをステップ数steps回だけ回転させる（200ステップで一周）
@@ -59,7 +76,7 @@ void rotateMotorByStepsInDirection(Direction dir, int steps) {
         digitalWrite(STEP_R, LOW);
         delayMicroseconds(20000);
       }
-    case Direction::Backward:
+    case Direction::BACKWARD:
       digitalWrite(DIR_L, HIGH);
       digitalWrite(DIR_R, LOW);
       // モータをステップ数steps回だけ回転させる（200ステップで一周）
@@ -74,7 +91,7 @@ void rotateMotorByStepsInDirection(Direction dir, int steps) {
         digitalWrite(STEP_R, LOW);
         delayMicroseconds(20000);
       }
-    case Direction::Leftward:
+    case Direction::LEFTWORD:
       digitalWrite(DIR_L, LOW);
       digitalWrite(DIR_R, HIGH);
       // モータをステップ数steps回だけ回転させる（200ステップで一周）
@@ -84,7 +101,7 @@ void rotateMotorByStepsInDirection(Direction dir, int steps) {
         digitalWrite(STEP_L, LOW);
         delayMicroseconds(20000);
       }
-    case Direction::Rightward:
+    case Direction::RIGHTWORD:
       digitalWrite(DIR_L, LOW);
       digitalWrite(DIR_R, HIGH);
       // モータをステップ数steps回だけ回転させる（200ステップで一周）
@@ -113,25 +130,25 @@ void rotateMotorByStepsInDirection(Direction dir, int steps) {
 // 前進するようにモータをステップ数だけ回す
 // rotateMotorByStepsInDirectionのラッパー
 void rotateMotorForwardBySteps(int steps) {
-  rotateMotorByStepsInDirection(Direction::Forward, steps);
+  rotateMotorByStepsInDirection(Direction::FORWARD, steps);
 }
 
 // 後退するようにモータをステップ数だけ回す
 // rotateMotorByStepsInDirectionのラッパー
 void rotateMotorBackwardBySteps(int steps) {
-  rotateMotorByStepsInDirection(Direction::Backward, steps);
+  rotateMotorByStepsInDirection(Direction::BACKWARD, steps);
 }
 
 // 左旋回するようにモータをステップ数だけ回す
 // rotateMotorByStepsInDirectionのラッパー
 void rotateMotorLeftwardBySteps(int steps) {
-  rotateMotorByStepsInDirection(Direction::Leftward, steps);
+  rotateMotorByStepsInDirection(Direction::LEFTWORD, steps);
 }
 
 // 右旋回するようにモータをステップ数だけ回す
 // rotateMotorByStepsInDirectionのラッパー
 void rotateMotorRightwardBySteps(int steps) {
-  rotateMotorByStepsInDirection(Direction::Rightward, steps);
+  rotateMotorByStepsInDirection(Direction::RIGHTWORD, steps);
 }
 
 void setup() {
@@ -169,15 +186,45 @@ void Drive(bool b0, bool b1) {
   }
 }
 
+int* readPhotoReflectorValue() {
+  int line_array[LINE_ELEMENTS];
+  line_array[0] = analogRead(LEFT);
+  line_array[1] = analogRead(SENTER_L);
+  line_array[2] = analogRead(SENTER_R);
+  line_array[3] = analogRead(RIGHT);
+  return line_array;
+}
+
+// // ラズパイに信号を送信する
+// void sendSignalToRaspberryPi(int* line_array) {
+//   int i = 0;
+//   for (i = 0; i < LINE_ELEMENTS - 1; i++) {
+//     Serial.print(line_array[i]);
+//     Serial.print(",");
+//   }
+//   Serial.println(line_array[i]);
+// }
+
+// void receiveSignalFromRaspberryPi() {
+//   if(Serial.available() > 0){ 
+//       Serial.readBytes(data, BUFFER_SIZE);
+
+//       // ここでそれぞれのモータに対して信号を送る
+//       // この時にdataをbit演算して必要なところだけ取り出す
+//    }
+// }
+
 void loop() {
   // put your main code here, to run repeatedly:
 
   // ここを関数readPhotoReflectorValueにまとめる
+  int* line_array = readPhotoReflectorValue();
   // line_array[0] = analogRead(LEFT);
   // line_array[1] = analogRead(SENTER_L);
   // line_array[2] = analogRead(SENTER_R);
   // line_array[3] = analogRead(RIGHT);
 
+  // sendSignalToRaspberryPi(line_array);
   int i = 0;
   // ここを関数sendSignalToRaspberryPiにまとめる
   for (i = 0; i < LINE_ELEMENTS - 1; i++) {
@@ -186,10 +233,14 @@ void loop() {
   }
   Serial.println(line_array[i]);
 
+  // receiveSignalFromRaspberryPi();
   // ここを関数receiveSignalFromRaspberryPiにまとめる
   if(Serial.available() > 0){ 
       Serial.readBytes(data, BUFFER_SIZE);
    }
+  
+  Serial.print(data[1]);
+  Serial.println(data[0]);
   
   // ここビット単位なので注意が必要
   // まずは1byteのデータから当該箇所のビット列を取り出す関数extractBitFromByteが必要
