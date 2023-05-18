@@ -17,16 +17,16 @@ SPHERE_MAX_DIS : 球とみなす最大の距離
 
 # 赤い色の範囲を指定
 lower_red1 = np.array([0, 128, 0])
-upper_red1 = np.array([13, 255, 255])
+upper_red1 = np.array([10, 255, 255])
 lower_red2= np.array([167, 128, 0])
 upper_red2 = np.array([179, 255, 255])
 
 # 青色の範囲を指定
-lower_blue = np.array([100, 128, 0])
+lower_blue = np.array([90, 128, 0])
 upper_blue = np.array([137, 255, 255])
 
 # 黄色の範囲を指定
-lower_yellow = np.array([20, 128, 0])
+lower_yellow = np.array([15, 64, 0])
 upper_yellow = np.array([35, 255, 255])
 
 # 球の半径[mm]
@@ -37,10 +37,10 @@ WIDTH = 640
 HEIGHT = 480
 
 # 球とみなす頂点数
-SPHERE_VERTEX = 20
+SPHERE_VERTEX = 12
 
 # 球とみなす最大の距離
-SPHERE_MAX_DIS = 500
+SPHERE_MAX_DIS = 1000
 
 def SetCamera(width, height):
     """
@@ -56,7 +56,7 @@ def SetCamera(width, height):
     cap : cv2のビデオキャプチャ
     """
     # カメラの設定
-    cap = cv2.VideoCapture(1)
+    cap = cv2.VideoCapture(0)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
 
@@ -92,7 +92,8 @@ def FindTarget(frame):
 
         # 色ごとに，最も近い球の座標と距離(とデバッグ用の半径)を取得
         x[i], y[i], dis[i], r[i] = GetCoordinatesAndDistance(mask)
-        cv2.circle(frame,(int(x[i]),int(y[i])),int(r[i]),(0,255,0),2)  # デバッグ用　画面に円を表示する準備
+        # cv2.circle(mask,(int(x[i]),int(y[i])),int(r[i]),(0,255,0),2)   デバッグ用　画面に円を表示する準備
+    # cv2.imshow("mask", mask_red + mask_blue + mask_yellow)   デバッグ用　画面にマスク表示
 
     # 最も近い球の色を取得する
     col = np.argmin(dis)
@@ -170,10 +171,8 @@ def CalcDistance(r):
     """
     dis = 0
     fy = 957.51116557
-    camy = 2.7
-    # camx = 3.6
-    #camx, camyはhttp://zattouka.net/GarageHouse/micon/Camera/JPEG/VC0706_1.htmlを参照
-    pxl=960
+    camy = 2.4
+    pxl = HEIGHT
     r = r * camy / pxl
     fy = fy * camy / pxl
     dis = RADIUS *  fy / r
@@ -190,7 +189,6 @@ if __name__ == "__main__":
 
         # デバッグ
         print(x, y, dis, col)
-        cv2.imshow("frame", frame)
 
         # ESCキーで終了
         if cv2.waitKey(1) == 27:
