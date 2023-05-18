@@ -13,7 +13,7 @@ void CommunicationService::send(int* line_array) {
 }
 
 // ラズパイへ送信
-int CommunicationService::receive() {
+char CommunicationService::receive() {
   if(Serial.available() > 0){ 
       char data[BUFFER_SIZE];
       Serial.readBytes(data, BUFFER_SIZE*2);
