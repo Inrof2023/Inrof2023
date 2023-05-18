@@ -124,4 +124,4 @@ if __name__ == '__main__':
     # 単体テスト
     unittest.main()
     
-    # communicate_with_arduino()
+    communicate_with_arduino()
