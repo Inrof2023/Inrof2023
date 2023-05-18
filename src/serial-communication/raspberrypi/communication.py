@@ -68,6 +68,9 @@ def communicate_with_arduino() -> None:
         # データを送信
         ser.write(serial_byte)
         
+        # デバッグ用
+        print("send: {}".format(ser.readline()))
+        
     return
 
 def determine_robot_motion_from_photoreflector(left: float, center_left: float, center_right: float, right:float) -> None:
