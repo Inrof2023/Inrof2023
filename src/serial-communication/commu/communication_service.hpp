@@ -13,12 +13,6 @@
 // バッファサイズ
 #define BUFFER_SIZE 1
 
-enum class Motor {
-    STEPPING,
-    SERVO,
-    DC
-};
-
 class CommunicationService {
     public:
         void send(int* line);

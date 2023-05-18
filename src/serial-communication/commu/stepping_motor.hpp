@@ -48,6 +48,7 @@ class SteppingMotor {
     void rotateMotorBackwardBySteps(int steps); // 後退
     void rotateMotorLeftwardBySteps(int steps); // 左回り
     void rotateMotorRightwardBySteps(int steps); // 右回り
+    void moveSteppingMotor(int sirial_data, int steps); // モーターを動かす
 };
 
 #endif // __STEPPING_MOTOR__

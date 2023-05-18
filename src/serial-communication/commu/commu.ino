@@ -1,7 +1,9 @@
 #include <Servo.h>
 // #include "constants.hpp"
-#include "stepping_motor.hpp"
+// #include "stepping_motor.hpp"
+#include "motor_service.hpp"
 #include "communication_service.hpp"
+#include "motor_service.hpp"
 Servo servo;
 
 using namespace std;
@@ -31,8 +33,14 @@ const int STEP_L = 5;
 const int DIR_R = 6;
 const int STEP_R = 7;
 
+// ステッピングモータ用のクラス
+SteppingMotor stepping_motor;
+
 // 通信用のクラス
 CommunicationService communication;
+
+// モーター用のクラス
+MotorService motor_service(stepping_motor);
 
 //受信データ格納
 // const int BUFFER_SIZE = 1;
@@ -159,6 +167,7 @@ void setup() {
   pinMode(STEP_R, OUTPUT);
   digitalWrite(DIR_R, LOW);
   digitalWrite(STEP_R, LOW);
+
 }
 
 void Drive(bool b0, bool b1) {
@@ -189,40 +198,25 @@ void readPhotoReflectorValue(int* line_array) {
   // return line_array;
 }
 
-// // ラズパイに信号を送信する
-// void sendSignalToRaspberryPi(int* line_array) {
-//   int i = 0;
-//   for (i = 0; i < LINE_ELEMENTS - 1; i++) {
-//     Serial.print(line_array[i]);
-//     Serial.print(",");
-//   }
-//   Serial.println(line_array[i]);
-// }
-
-// void receiveSignalFromRaspberryPi() {
-//   if(Serial.available() > 0){ 
-//       Serial.readBytes(data, BUFFER_SIZE);
-
-//       // ここでそれぞれのモータに対して信号を送る
-//       // この時にdataをbit演算して必要なところだけ取り出す
-//    }
-// }
-
 void loop() {
   // put your main code here, to run repeatedly:
 
   int line_array[LINE_ELEMENTS];
   readPhotoReflectorValue(line_array);
   communication.send(line_array);
-  char data = communication.receive();
+  char serial_data = communication.receive();
+
+  motor_service.driveMotor(serial_data); // 受け取ったデータを元にモータを動かす
 
   // 後ろの3bitを取得する
   // 0b00000111とAND演算する
-  int and_data = data & 0b00000111;
-  if (and_data == 0b00000001) {
-    rotateMotorForwardBySteps(10);
-  }
+  // int and_data = data & 0b00000111;
+  // if (and_data == 0b00000001) {
+  //   rotateMotorForwardBySteps(10);
+  // }
   // rotateMotorForwardBySteps(10);
+
+  
   
   // ここビット単位なので注意が必要
   // まずは1byteのデータから当該箇所のビット列を取り出す関数extractBitFromByteが必要
