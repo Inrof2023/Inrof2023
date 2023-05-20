@@ -1,12 +1,7 @@
 #ifndef __STEPPING_MOTOR__ 
 #define __STEPPING_MOTOR__
 
-//ステッピングモーター左
-#define DIR_LEFT 4
-#define STEP_LEFT 5
-//ステッピングモーター右
-#define DIR_RIGHT 6
-#define STEP_RIGHT 7
+#include "constants.hpp"
 
 // 方向を表す列挙体
 enum class Direction {
