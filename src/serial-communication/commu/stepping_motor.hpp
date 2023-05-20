@@ -43,6 +43,7 @@ class SteppingMotor {
     // void rotateMotorOneStepInDirection(SteppingMotorSide dir); // 指定された向き（前進または後退）1ステップだけ回す
   public: 
     SteppingMotor(); // コンストラクタ
+    void setup();
 
     void rotateMotorForwardBySteps(int steps); // 前進
     void rotateMotorBackwardBySteps(int steps); // 後退

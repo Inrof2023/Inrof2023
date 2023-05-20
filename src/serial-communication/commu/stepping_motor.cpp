@@ -2,8 +2,14 @@
 #include "stepping_motor.hpp"
 
 SteppingMotor::SteppingMotor() {
-  // pinModeの設定
-  // 左のモータ
+  // メンバ変数の設定
+  this->DIR_L = DIR_LEFT;
+  this->STEP_L = STEP_LEFT;
+  this->DIR_R = DIR_RIGHT;
+  this->STEP_R = STEP_RIGHT;
+}
+
+void SteppingMotor::setup() {
   pinMode(DIR_L, OUTPUT);
   pinMode(STEP_L, OUTPUT);
   digitalWrite(DIR_L, LOW);
@@ -13,12 +19,6 @@ SteppingMotor::SteppingMotor() {
   pinMode(STEP_R, OUTPUT);
   digitalWrite(DIR_R, LOW);
   digitalWrite(STEP_R, LOW);
-  
-  // メンバ変数の設定
-  this->DIR_L = DIR_LEFT;
-  this->STEP_L = STEP_LEFT;
-  this->DIR_R = DIR_RIGHT;
-  this->STEP_R = STEP_RIGHT;
 }
 
 void SteppingMotor::rotateMotorByStepsInDirection(Direction dir, int steps) {
