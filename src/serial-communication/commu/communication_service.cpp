@@ -2,14 +2,26 @@
 #include "communication_service.hpp"
 #include <Arduino.h>
 
+// フォトリフレクタの値を取得してline_arrayに格納
+void CommunicationService::readPhotoReflectorValue() {
+  this->line_array[0] = analogRead(LEFT);
+  this->line_array[1] = analogRead(SENTER_L);
+  this->line_array[2] = analogRead(SENTER_R);
+  this->line_array[3] = analogRead(RIGHT);
+}
+
 // ラズパイから受信
-void CommunicationService::send(int* line_array) {
-  int i = 0;
-  for (i = 0; i < LINE_ELEMENTS - 1; i++) {
-    Serial.print(line_array[i]);
-    Serial.print(",");
+void CommunicationService::send() {
+
+  // フォトリフレクタの値を取得
+  // 内部のline_arrayに格納される
+  CommunicationService::readPhotoReflectorValue();
+
+  for (int i = 0; i < LINE_ELEMENTS; i++ ){
+    Serial.print(this->line_array[i]);
+    if (i == LINE_ELEMENTS - 1) Serial.print("\n");
+    else Serial.print(",");
   }
-  Serial.println(line_array[i]);
 }
 
 // ラズパイへ送信
@@ -26,17 +38,3 @@ char CommunicationService::receive() {
       // この時にdataをbit演算して必要なところだけ取り出す
    }
 }
-
-// // 1byteのデータから必要なバイトを取り出す
-// int CommunicationService::getMotorDataFromByte(Motor motor, char serial_data) {
-//   switch (motor)
-//   {
-//   case Motor::STEPPING: // 後ろの3bitを取得する, ステッピングモータ
-//     return serial_data & 0b00000111;
-//   case Motor::SERVO: // 後ろから4bit目を取得する, サーボモータ
-//     return serial_data & 0b00001000;
-//   case Motor::DC: // 後ろから5bit目を取得する, DCモータ
-//     return serial_data & 0b00010000;
-//   }
-// }
-

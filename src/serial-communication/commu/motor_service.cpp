@@ -2,6 +2,8 @@
 
 MotorService::MotorService(SteppingMotor stepping_motor) {
     this->stepping_motor = stepping_motor;
+    // this->servo_motor = servo_motor;
+    // this->dc_motor = dc_motor;
 }
 
 // 1byteのデータから必要なバイトを取り出す
@@ -21,6 +23,12 @@ void MotorService::driveMotor(char serial_data) {
     // ステッピングモータ
     this->stepping_motor.moveSteppingMotor(MotorService::getMotorDataFromByte(Motor::STEPPING, serial_data), 20);
     // サーボモータ
+<<<<<<< HEAD
     
     // DCモータ
+=======
+    // this->servo_motor.moveServoMotor(MotorService::getMotorDataFromByte(Motor::SERVO, serial_data));
+    // DCモータ
+    // this->dc_motor.moveDCMotor(MotorService::getMotorDataFromByte(Motor::DC, serial_data));
+>>>>>>> 11b9886 (split some class. conducted the actual machine test.)
 }
