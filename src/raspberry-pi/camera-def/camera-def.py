@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import time
 
 """
 グローバル宣言
@@ -59,7 +60,7 @@ def SetCamera(width, height):
     cap = cv2.VideoCapture(0)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
-
+    # cap.set(cv2.CAP_PROP_BUFFERSIZE,1)
     return cap
 
 
@@ -181,7 +182,8 @@ def CalcDistance(r):
 if __name__ == "__main__":
     # 使用例
     cap = SetCamera(WIDTH, HEIGHT)
-    while True:
+    start_time = time.time()
+    while time.time()-start_time<2880:
         # フレームをキャプチャ
         ret, frame = cap.read()
         # 色検出+輪郭検出
@@ -190,10 +192,6 @@ if __name__ == "__main__":
         # デバッグ
         print(x, y, dis, col)
 
-        # ESCキーで終了
-        if cv2.waitKey(1) == 27:
-            break
 
     # 終了処理
     cap.release()
-    # cv2.destroyAllWindows()   デバッグ用　ウィンドウの終了
