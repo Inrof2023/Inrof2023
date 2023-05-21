@@ -7,6 +7,13 @@ MotorService::MotorService(SteppingMotor stepping_motor, ServoMotor servo_motor)
     // this->dc_motor = dc_motor;
 }
 
+MotorService::MotorService() {
+    SteppingMotor stepping_motor;
+    ServoMotor servo_motor;
+    this->stepping_motor = stepping_motor;
+    this->servo_motor = servo_motor;
+}
+
 void MotorService::setup() {
     // セットアップ
     // モータのピンのセットアップとか

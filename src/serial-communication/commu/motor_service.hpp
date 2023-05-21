@@ -21,6 +21,7 @@ class MotorService {
 
     public:
         MotorService(SteppingMotor stepping_motor, ServoMotor servo_motor);
+        MotorService();
         void setup();
         void driveMotor(char serial_data);
 };

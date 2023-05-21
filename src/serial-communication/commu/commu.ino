@@ -6,6 +6,7 @@
 #include "motor_service.hpp"
 #include "servo_motor.hpp"
 #include "data_receive_result_object.hpp"
+#include "motor_controller_application.hpp"
 Servo servo;
 
 using namespace std;
