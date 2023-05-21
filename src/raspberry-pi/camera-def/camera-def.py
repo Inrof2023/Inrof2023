@@ -4,44 +4,34 @@ import time
 
 """
 グローバル宣言
-
-lower_red1, upper_red1 : 赤色の範囲その1
-lower_red2, upper_red2 : 赤色の範囲その2
-lower_blue, upper_blue : 青色の範囲
-lower_yellow, upper_yellow : 黄色の範囲
-RADIUS : 球の半径
-WIDTH : 取得画像の横の解像度
-HEIGHT : 取得画像の縦の解像度
-SPHERE_VERTEX : 球とみなす頂点数
-SPHERE_MAX_DIS : 球とみなす最大の距離
 """
 
 # 赤い色の範囲を指定
-lower_red1 = np.array([0, 128, 0])
-upper_red1 = np.array([10, 255, 255])
-lower_red2= np.array([167, 128, 0])
-upper_red2 = np.array([179, 255, 255])
+lower_red1 = np.array([0, 64, 20])
+upper_red1 = np.array([15, 255, 255])
+lower_red2= np.array([225, 64, 20])
+upper_red2 = np.array([255, 255, 255])
 
 # 青色の範囲を指定
-lower_blue = np.array([90, 128, 0])
-upper_blue = np.array([137, 255, 255])
+lower_blue = np.array([130, 64, 20])
+upper_blue = np.array([175, 255, 255])
 
 # 黄色の範囲を指定
-lower_yellow = np.array([15, 64, 0])
-upper_yellow = np.array([35, 255, 255])
+lower_yellow = np.array([20, 64, 20])
+upper_yellow = np.array([50, 255, 255])
 
 # 球の半径[mm]
 RADIUS = 32.5
 
 # 取得画像の解像度
-WIDTH = 640
-HEIGHT = 480
+WIDTH = 320
+HEIGHT = 240
 
-# 球とみなす頂点数
-SPHERE_VERTEX = 12
+# 球とみなす円形度
+THRES_CIRCULARITY = 0.75
 
-# 球とみなす最大の距離
-SPHERE_MAX_DIS = 1000
+# 球を検出できる最大の距離
+DETECTABLE_MAX_DIS = 1000
 
 def SetCamera(width, height):
     """
@@ -60,7 +50,7 @@ def SetCamera(width, height):
     cap = cv2.VideoCapture(0)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
-    # cap.set(cv2.CAP_PROP_BUFFERSIZE,1)
+
     return cap
 
 
@@ -76,25 +66,26 @@ def FindTarget(frame):
     -------
     x[col] : 球の中心のx座標(ピクセル)
     y[col] : 球の中心のy座標(ピクセル)
-    dis[col] : 球までの距離[mm](キャリブレーションを用いた値を使用するためズレがある)
+    dis[col] : 球までの距離[mm](キャリブレーションを用いた値)
     col : 球の色(0:赤, 1:青, 2:黄)
     """
-    x=np.zeros(3)
-    y=np.zeros(3)
-    dis=np.zeros(3)
-    r=np.zeros(3)
+    x = np.zeros(3)
+    y = np.zeros(3)
+    dis = np.zeros(3)
+    r = np.zeros(3)
 
     # 二値画像の取得
     (mask_red, mask_blue, mask_yellow) = Masking(frame)
     
     for i, mask in enumerate([mask_red, mask_blue, mask_yellow]):
         # メディアンフィルタを適用する。
-        mask = cv2.medianBlur(mask, ksize=7)
+        mask = cv2.medianBlur(mask, ksize=5)
 
         # 色ごとに，最も近い球の座標と距離(とデバッグ用の半径)を取得
         x[i], y[i], dis[i], r[i] = GetCoordinatesAndDistance(mask)
-        # cv2.circle(mask,(int(x[i]),int(y[i])),int(r[i]),(0,255,0),2)   デバッグ用　画面に円を表示する準備
-    # cv2.imshow("mask", mask_red + mask_blue + mask_yellow)   デバッグ用　画面にマスク表示
+        # cv2.circle(frame,(int(x[i]),int(y[i])),int(r[i]),(0,255,0),2)   #デバッグ用　画面に円を表示する準備
+    # cv2.imshow("frame", frame)   #デバッグ用　画面に表示
+    # cv2.imshow("mask", mask_red + mask_blue + mask_yellow)   #デバッグ用　画面に表示
 
     # 最も近い球の色を取得する
     col = np.argmin(dis)
@@ -114,7 +105,7 @@ def Masking(frame):
     """
 
     # 画像をHSVに変換
-    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV_FULL)
     # 赤,青,黄色の範囲内の領域を抽出(二値化)
     mask_red = cv2.inRange(hsv, lower_red1, upper_red1) + cv2.inRange(hsv, lower_red2, upper_red2)
     mask_blue = cv2.inRange(hsv, lower_blue, upper_blue)
@@ -131,32 +122,53 @@ def GetCoordinatesAndDistance(mask):
     mask : 二値画像
 
     Returns
-    (min_x, min_y, min_dis, min_r) : (最も近い球のx座標, 最も近い球のy座標, 最も近い距離, 最も近い球の半径(デバッグ用))
+    (x, y, dis, r) : (最も近い球のx座標, 最も近い球のy座標, 最も近い距離, 最も近い球の半径(デバッグ用))
     -------
     
     """
-    min_x = 0
-    min_y = 0
-    min_dis = SPHERE_MAX_DIS
-    min_r = 0
-
     # 輪郭検出
     contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    for cnt in contours:
-        # 輪郭を近似する
-        approx = cv2.approxPolyDP(cnt, 0.01*cv2.arcLength(cnt,True),True)
+    if len(contours) > 0:
+        x = np.zeros(len(contours))
+        y = np.zeros(len(contours))
+        r = np.zeros(len(contours))
+        for i, cnt in enumerate(contours):
+            # 輪郭の円形度を計算する
+            cir = CalcCircularity(cnt)
+            if cir > THRES_CIRCULARITY:
+                # 外接円の座標と半径を取得
+                (x[i],y[i]),r[i] = cv2.minEnclosingCircle(cnt)
+        # 最も半径の大きい球の配列番号を取得
+        n = np.argmax(r)
+        # 距離を計算
+        dis = CalcDistance(r[n])
+        return x[n], y[n], dis, r[n]
+    else:
+        return 0, 0, DETECTABLE_MAX_DIS, 0
 
-        # 近似された輪郭が球体に近いかどうかを判断する
-        if len(approx) > SPHERE_VERTEX:
-            (x,y),r = cv2.minEnclosingCircle(cnt)
-            dis = CalcDistance(r)
-            # 最小値なら入れ替え
-            if dis<min_dis:
-                min_x = int(x)
-                min_y = int(y)
-                min_dis = int(dis)
-                min_r = int(r)
-    return (min_x, min_y, min_dis, min_r)
+def CalcCircularity(cnt):
+    '''
+    円形度を求める
+
+    Parameters
+    ----------
+    cnt : 輪郭の(x,y)座標の配列
+
+    Returns
+    -------
+        円形度
+
+    '''
+    # 面積
+    area = cv2.contourArea(cnt)
+    # 周囲長
+    length = cv2.arcLength(cnt, True)
+    # 円形度を求める
+    try:
+        cir = 4*np.pi*area/length/length
+    except ZeroDivisionError:
+        cir = 0
+    return cir
 
 def CalcDistance(r):
     """
@@ -164,34 +176,49 @@ def CalcDistance(r):
 
     Parameters
     ----------
-    r : 球の半径
+    r : フレーム中の球の半径(ピクセル)
 
     Returns
     -------
     dis : カメラから球までの距離[mm](キャリブレーションを用いた値を使用するためズレがある)
     """
-    dis = 0
-    fy = 957.51116557
-    camy = 2.4
     pxl = HEIGHT
-    r = r * camy / pxl
-    fy = fy * camy / pxl
-    dis = RADIUS *  fy / r
+    # y方向の焦点距離
+    fy = 470
+    # WebカメラのCMOSセンサー(1/4インチと仮定)の高さ[mm]
+    camy = 2.7
+    try:
+        r = r * camy / pxl
+        fy = fy * camy / pxl
+        dis = RADIUS *  fy / r
+    except ZeroDivisionError:
+        dis = DETECTABLE_MAX_DIS
     return dis
 
 if __name__ == "__main__":
     # 使用例
     cap = SetCamera(WIDTH, HEIGHT)
     start_time = time.time()
-    while time.time()-start_time<2880:
+    # 決勝の競技時間+準備時間(12分)×トライ可能数(4回)×60秒
+    while (time.time()-start_time<2880):
         # フレームをキャプチャ
         ret, frame = cap.read()
         # 色検出+輪郭検出
         x, y, dis, col = FindTarget(frame)
 
-        # デバッグ
-        print(x, y, dis, col)
+        # 小さすぎる円は球とみなさない(重要!)
+        if dis < DETECTABLE_MAX_DIS:
+            # コンソール表示
+            print(x, y, dis, col)
 
+        """ 
+        デバッグ用　ESCキーで終了
+        if cv2.waitKey(1) == 27:
+            break
+        """
 
     # 終了処理
     cap.release()
+
+    # cv2.destroyAllWindows()   #デバッグ用　ウィンドウの終了
+
