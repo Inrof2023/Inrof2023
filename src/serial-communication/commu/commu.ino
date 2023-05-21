@@ -5,6 +5,7 @@
 #include "communication_service.hpp"
 #include "motor_service.hpp"
 #include "servo_motor.hpp"
+#include "data_receive_result_object.hpp"
 Servo servo;
 
 using namespace std;
@@ -33,8 +34,6 @@ MotorService motor_service(stepping_motor, servo_motor);
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
-  servo.attach(2);
-  servo.write(0);
   // stepping_motor.setup();
   motor_service.setup();
   // pinMode(DC_F, OUTPUT);
@@ -42,14 +41,16 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-
   communication.send();
-  char serial_data = communication.receive();
-  motor_service.driveMotor(serial_data);
-  // servo.write(0);
-  // delay(1000);
-  // servo.write(90);
-  // delay(1000);
+  // char serial_data = communication.receive();
+  DataReceiveResultObject data_receive_result_object = communication.receive();
+  if (data_receive_result_object.getIsSuccess()) {
+    // データが送られてきている時だけ動作する
+    motor_service.driveMotor(data_receive_result_object.getSerialData());
+  } else {
+    // データが送られてきていないときはストップ
+  }
+  // motor_service.driveMotor(serial_data);
 }
 
 // //DC motorによる吸い込み
