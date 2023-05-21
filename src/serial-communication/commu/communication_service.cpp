@@ -28,7 +28,7 @@ void CommunicationService::send() {
 char CommunicationService::receive() {
   if(Serial.available() > 0){ 
       char data[BUFFER_SIZE];
-      Serial.readBytes(data, BUFFER_SIZE*2);
+      Serial.readBytes(data, BUFFER_SIZE);
 
       // デバッグ用
       // int received_data = data[0]; // ここがだいぶ怪しい
