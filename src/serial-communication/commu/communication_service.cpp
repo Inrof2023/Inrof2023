@@ -33,10 +33,6 @@ DataReceiveResultObject CommunicationService::receive() {
       // デバッグ用
       // int received_data = data[0]; // ここがだいぶ怪しい
       return DataReceiveResultObject(true, data[0]);
-      // return data[0];
-      // Serial.println(data[0]);
-      // ここでそれぞれのモータに対して信号を送る
-      // この時にdataをbit演算して必要なところだけ取り出す
    } else {
       return DataReceiveResultObject(false, 0);
    }

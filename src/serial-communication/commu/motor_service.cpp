@@ -1,12 +1,5 @@
 #include "motor_service.hpp"
 
-MotorService::MotorService(SteppingMotor stepping_motor, ServoMotor servo_motor) {
-    // インスタンスを格納
-    this->stepping_motor = stepping_motor;
-    this->servo_motor = servo_motor;
-    // this->dc_motor = dc_motor;
-}
-
 MotorService::MotorService() {
     SteppingMotor stepping_motor;
     ServoMotor servo_motor;

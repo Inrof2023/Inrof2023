@@ -20,7 +20,6 @@ class MotorService {
         int getMotorDataFromByte(Motor motor, char serial_data);
 
     public:
-        MotorService(SteppingMotor stepping_motor, ServoMotor servo_motor);
         MotorService();
         void setup();
         void driveMotor(char serial_data);

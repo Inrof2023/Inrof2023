@@ -15,10 +15,6 @@ enum class Direction {
   LEFTWORD,
   RIGHTWORD
 };
-// private enum class SteppingMotorSide {
-//   LEFT,
-//   RIGHT
-// };
 
 // ステッピングモータクラス
 class SteppingMotor {

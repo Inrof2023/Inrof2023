@@ -4,8 +4,6 @@ ServoMotor::ServoMotor() {
     // サーボモータを宣言して初期化
     // クラスのservoに格納する
     Servo servo;
-    // servo.attach(SERVO_PIN);
-    // servo.write(0);
     this -> servo = servo;
     this->PIN = SERVO_PIN;
 }

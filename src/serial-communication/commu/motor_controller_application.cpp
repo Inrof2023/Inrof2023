@@ -1,12 +1,6 @@
 #include "motor_controller_application.hpp"
 
 MotorControllerApplication::MotorControllerApplication() {
-    // ステッピングモータ
-    SteppingMotor stepping_motor;
-
-    // サーボモータ
-    ServoMotor servo_motor;
-
     // 通信用のクラス
     CommunicationService communication_service;
 
@@ -15,9 +9,6 @@ MotorControllerApplication::MotorControllerApplication() {
 
     this->communication_service = communication_service;
     this->motor_service = motor_service;
-    // インスタンスを格納
-    // this->communication_service = communication_service;
-    // this->motor_service = motor_service;
 }
 
 void MotorControllerApplication::setup() {
