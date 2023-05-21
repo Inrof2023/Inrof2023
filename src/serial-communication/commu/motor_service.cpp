@@ -1,7 +1,17 @@
 #include "motor_service.hpp"
 
-MotorService::MotorService(SteppingMotor stepping_motor) {
+MotorService::MotorService() {
+    SteppingMotor stepping_motor;
+    ServoMotor servo_motor;
     this->stepping_motor = stepping_motor;
+    this->servo_motor = servo_motor;
+}
+
+void MotorService::setup() {
+    // セットアップ
+    // モータのピンのセットアップとか
+    this->stepping_motor.setup();
+    this->servo_motor.setup();
 }
 
 // 1byteのデータから必要なバイトを取り出す
@@ -21,6 +31,7 @@ void MotorService::driveMotor(char serial_data) {
     // ステッピングモータ
     this->stepping_motor.moveSteppingMotor(MotorService::getMotorDataFromByte(Motor::STEPPING, serial_data), 20);
     // サーボモータ
-    
+    // this->servo_motor.moveServoMotor(MotorService::getMotorDataFromByte(Motor::SERVO, serial_data));
     // DCモータ
+    // this->dc_motor.moveDCMotor(MotorService::getMotorDataFromByte(Motor::DC, serial_data));
 }

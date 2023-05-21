@@ -1,40 +1,28 @@
-#ifndef _CONSTANTS_
-#define _CONSTANTS_
+#ifndef _CONSTANTS_FOR_ARDUINO_
+#define _CONSTANTS_FOR_ARDUINO_
 
 #include <Arduino.h>
 
-#define LINE_ELEMENTS 4
-#define LEFT A0
-#define SENTER_L A1
-#define SENTER_R A2
-#define RIGHT A3
+#define LINE_ELEMENTS 4 // フォトリフレクタの数
+#define LEFT A0 // フォトリフレクタ左
+#define SENTER_L A1 // フォトリフレクタ真ん中左
+#define SENTER_R A2 // フォトリフレクタ真ん中右
+#define RIGHT A3 // フォトリフテクタ右
 
-// フォトリフレクタ
-// const int LINE_ELEMENTS = 4; // フォトリフレクタの数
-// const int LEFT = A0; 
-// const int SENTER_L = A1;
-// const int SENTER_R = A2;
-// const int RIGHT = A3;
+#define DC_PIN 3 // DCモーターのピン番号
+
+#define SERVO_PIN 2 // サーボモーターのピン番号
+#define UP_ANGLE 90 // サーボモーターの上向きの角度
+#define DOWN_ANGLE 0 // サーボモーターの下向きの角度
+
+//ステッピングモーター左
+#define DIR_LEFT 4
+#define STEP_LEFT 5
+//ステッピングモーター右
+#define DIR_RIGHT 6
+#define STEP_RIGHT 7
 
 //100以上を白とみなす
 // const int THRESHOLD = 100;
-// int line_array[LINE_ELEMENTS];
 
-// //サーボモーター
-// const int SV = 2;
-
-// //DCモーター
-// const int DC_F = 3;
-
-// //ステッピングモーター左
-// const int DIR_L = 4;
-// const int STEP_L = 5;
-// //ステッピングモーター右
-// const int DIR_R = 6;
-// const int STEP_R = 7;
-
-// //受信データ格納
-// const int BUFFER_SIZE = 1;
-// byte data[BUFFER_SIZE];
-
-#endif // _CONSTANTS_
+#endif // _CONSTANTS_FOR_ARDUINO_

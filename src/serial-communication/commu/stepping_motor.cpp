@@ -2,8 +2,14 @@
 #include "stepping_motor.hpp"
 
 SteppingMotor::SteppingMotor() {
-  // pinModeの設定
-  // 左のモータ
+  // メンバ変数の設定
+  this->DIR_L = DIR_LEFT;
+  this->STEP_L = STEP_LEFT;
+  this->DIR_R = DIR_RIGHT;
+  this->STEP_R = STEP_RIGHT;
+}
+
+void SteppingMotor::setup() {
   pinMode(DIR_L, OUTPUT);
   pinMode(STEP_L, OUTPUT);
   digitalWrite(DIR_L, LOW);
@@ -13,33 +19,12 @@ SteppingMotor::SteppingMotor() {
   pinMode(STEP_R, OUTPUT);
   digitalWrite(DIR_R, LOW);
   digitalWrite(STEP_R, LOW);
-  
-  // メンバ変数の設定
-  this->DIR_L = DIR_LEFT;
-  this->STEP_L = STEP_LEFT;
-  this->DIR_R = DIR_RIGHT;
-  this->STEP_R = STEP_RIGHT;
 }
 
 void SteppingMotor::rotateMotorByStepsInDirection(Direction dir, int steps) {
   // モータが回転する方向を設定している
   switch (dir) {
     case Direction::FORWARD:
-      digitalWrite(DIR_L, LOW);
-      digitalWrite(DIR_R, HIGH);
-      // モータをステップ数steps回だけ回転させる（200ステップで一周）
-      for (int i = 0; i < steps; i++) {
-        digitalWrite(STEP_L, HIGH);
-        delayMicroseconds(20000);
-        digitalWrite(STEP_L, LOW);
-        delayMicroseconds(20000);
-
-        digitalWrite(STEP_R, HIGH);
-        delayMicroseconds(20000);
-        digitalWrite(STEP_R, LOW);
-        delayMicroseconds(20000);
-      }
-    case Direction::BACKWARD:
       digitalWrite(DIR_L, HIGH);
       digitalWrite(DIR_R, LOW);
       // モータをステップ数steps回だけ回転させる（200ステップで一周）
@@ -54,6 +39,23 @@ void SteppingMotor::rotateMotorByStepsInDirection(Direction dir, int steps) {
         digitalWrite(STEP_R, LOW);
         delayMicroseconds(20000);
       }
+      break;
+    case Direction::BACKWARD:
+      digitalWrite(DIR_L, LOW);
+      digitalWrite(DIR_R, HIGH);
+      // モータをステップ数steps回だけ回転させる（200ステップで一周）
+      for (int i = 0; i < steps; i++) {
+        digitalWrite(STEP_L, HIGH);
+        delayMicroseconds(20000);
+        digitalWrite(STEP_L, LOW);
+        delayMicroseconds(20000);
+
+        digitalWrite(STEP_R, HIGH);
+        delayMicroseconds(20000);
+        digitalWrite(STEP_R, LOW);
+        delayMicroseconds(20000);
+      }
+      break;
     case Direction::LEFTWORD:
       digitalWrite(DIR_L, LOW);
       digitalWrite(DIR_R, HIGH);
@@ -64,6 +66,7 @@ void SteppingMotor::rotateMotorByStepsInDirection(Direction dir, int steps) {
         digitalWrite(STEP_L, LOW);
         delayMicroseconds(20000);
       }
+      break;
     case Direction::RIGHTWORD:
       digitalWrite(DIR_L, LOW);
       digitalWrite(DIR_R, HIGH);
@@ -74,6 +77,7 @@ void SteppingMotor::rotateMotorByStepsInDirection(Direction dir, int steps) {
         digitalWrite(STEP_R, LOW);
         delayMicroseconds(20000);
       }
+      break;
   }
 }
 
