@@ -48,17 +48,8 @@ void SteppingMotor::rotateMotorByStepsInDirection(Direction dir, int steps) {
       digitalWrite(DIR_R, LOW);
       // モータをステップ数steps回だけ回転させる（200ステップで一周）
       for (int i = 0; i < steps; i++) {
-        // digitalWrite(STEP_L, HIGH);
-        // delayMicroseconds(20000);
-        // digitalWrite(STEP_L, LOW);
-        // delayMicroseconds(20000);
         SteppingMotor::rotateMotorOneStepInDirection(SteppingMotorSide::LEFT);
         SteppingMotor::rotateMotorOneStepInDirection(SteppingMotorSide::RIGHT);
-
-        // digitalWrite(STEP_R, HIGH);
-        // delayMicroseconds(20000);
-        // digitalWrite(STEP_R, LOW);
-        // delayMicroseconds(20000);
       }
       break;
     case Direction::BACKWARD:
@@ -68,15 +59,6 @@ void SteppingMotor::rotateMotorByStepsInDirection(Direction dir, int steps) {
       for (int i = 0; i < steps; i++) {
         SteppingMotor::rotateMotorOneStepInDirection(SteppingMotorSide::LEFT);
         SteppingMotor::rotateMotorOneStepInDirection(SteppingMotorSide::RIGHT);
-        // digitalWrite(STEP_L, HIGH);
-        // delayMicroseconds(20000);
-        // digitalWrite(STEP_L, LOW);
-        // delayMicroseconds(20000);
-
-        // digitalWrite(STEP_R, HIGH);
-        // delayMicroseconds(20000);
-        // digitalWrite(STEP_R, LOW);
-        // delayMicroseconds(20000);
       }
       break;
     case Direction::LEFTWORD:
