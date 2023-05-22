@@ -69,7 +69,7 @@ def communicate_with_arduino() -> None:
         ser.write(serial_byte)
         
         # デバッグ用
-        print("send: {}".format(ser.readline()))
+        # print("send: {}".format(ser.readline()))
         
     return
 
@@ -118,10 +118,11 @@ class TestCommunication(unittest.TestCase):
 
 if __name__ == '__main__':
     # シリアル通信用のポートを環境変数に設定
-    os.environ['SERIAL_PORT'] = '/dev/ttyUSB0'
+    # os.environ['SERIAL_PORT'] = '/dev/ttyUSB0'
+    os.environ['SERIAL_PORT'] = '/dev/tty.usbserial-110'
     os.environ['BITRATE'] = '9600'
     
     # 単体テスト
-    unittest.main()
+    # unittest.main()
     
     communicate_with_arduino()
