@@ -9,16 +9,35 @@ SteppingMotor::SteppingMotor() {
   this->STEP_R = STEP_RIGHT;
 }
 
+void SteppingMotor::rotateMotorOneStepInDirection(SteppingMotorSide dir) {
+  switch (dir)
+  {
+  case SteppingMotorSide::LEFT:
+    digitalWrite(this->STEP_L, HIGH);
+    delayMicroseconds(20000);
+    digitalWrite(this->STEP_L, LOW);
+    delayMicroseconds(20000);
+    /* code */
+    break;
+  case SteppingMotorSide::RIGHT:
+    digitalWrite(this->STEP_R, HIGH);
+    delayMicroseconds(20000);
+    digitalWrite(this->STEP_R, LOW);
+    delayMicroseconds(20000);
+    break;
+  }
+}
+
 void SteppingMotor::setup() {
-  pinMode(DIR_L, OUTPUT);
-  pinMode(STEP_L, OUTPUT);
-  digitalWrite(DIR_L, LOW);
-  digitalWrite(STEP_L, LOW);
+  pinMode(this->DIR_L, OUTPUT);
+  pinMode(this->STEP_L, OUTPUT);
+  digitalWrite(this->DIR_L, LOW);
+  digitalWrite(this->STEP_L, LOW);
   // 右のモータ
-  pinMode(DIR_R, OUTPUT);
-  pinMode(STEP_R, OUTPUT);
-  digitalWrite(DIR_R, LOW);
-  digitalWrite(STEP_R, LOW);
+  pinMode(this->DIR_R, OUTPUT);
+  pinMode(this->STEP_R, OUTPUT);
+  digitalWrite(this->DIR_R, LOW);
+  digitalWrite(this->STEP_R, LOW);
 }
 
 void SteppingMotor::rotateMotorByStepsInDirection(Direction dir, int steps) {
@@ -29,15 +48,17 @@ void SteppingMotor::rotateMotorByStepsInDirection(Direction dir, int steps) {
       digitalWrite(DIR_R, LOW);
       // モータをステップ数steps回だけ回転させる（200ステップで一周）
       for (int i = 0; i < steps; i++) {
-        digitalWrite(STEP_L, HIGH);
-        delayMicroseconds(20000);
-        digitalWrite(STEP_L, LOW);
-        delayMicroseconds(20000);
+        // digitalWrite(STEP_L, HIGH);
+        // delayMicroseconds(20000);
+        // digitalWrite(STEP_L, LOW);
+        // delayMicroseconds(20000);
+        SteppingMotor::rotateMotorOneStepInDirection(SteppingMotorSide::LEFT);
+        SteppingMotor::rotateMotorOneStepInDirection(SteppingMotorSide::RIGHT);
 
-        digitalWrite(STEP_R, HIGH);
-        delayMicroseconds(20000);
-        digitalWrite(STEP_R, LOW);
-        delayMicroseconds(20000);
+        // digitalWrite(STEP_R, HIGH);
+        // delayMicroseconds(20000);
+        // digitalWrite(STEP_R, LOW);
+        // delayMicroseconds(20000);
       }
       break;
     case Direction::BACKWARD:
@@ -45,38 +66,30 @@ void SteppingMotor::rotateMotorByStepsInDirection(Direction dir, int steps) {
       digitalWrite(DIR_R, HIGH);
       // モータをステップ数steps回だけ回転させる（200ステップで一周）
       for (int i = 0; i < steps; i++) {
-        digitalWrite(STEP_L, HIGH);
-        delayMicroseconds(20000);
-        digitalWrite(STEP_L, LOW);
-        delayMicroseconds(20000);
+        SteppingMotor::rotateMotorOneStepInDirection(SteppingMotorSide::LEFT);
+        SteppingMotor::rotateMotorOneStepInDirection(SteppingMotorSide::RIGHT);
+        // digitalWrite(STEP_L, HIGH);
+        // delayMicroseconds(20000);
+        // digitalWrite(STEP_L, LOW);
+        // delayMicroseconds(20000);
 
-        digitalWrite(STEP_R, HIGH);
-        delayMicroseconds(20000);
-        digitalWrite(STEP_R, LOW);
-        delayMicroseconds(20000);
+        // digitalWrite(STEP_R, HIGH);
+        // delayMicroseconds(20000);
+        // digitalWrite(STEP_R, LOW);
+        // delayMicroseconds(20000);
       }
       break;
     case Direction::LEFTWORD:
-      digitalWrite(DIR_L, LOW);
-      digitalWrite(DIR_R, HIGH);
+      digitalWrite(DIR_L, HIGH);
       // モータをステップ数steps回だけ回転させる（200ステップで一周）
       for (int i = 0; i < steps; i++) {
-        digitalWrite(STEP_L, HIGH);
-        delayMicroseconds(20000);
-        digitalWrite(STEP_L, LOW);
-        delayMicroseconds(20000);
+        SteppingMotor::rotateMotorOneStepInDirection(SteppingMotorSide::LEFT);
       }
       break;
     case Direction::RIGHTWORD:
-      digitalWrite(DIR_L, LOW);
       digitalWrite(DIR_R, HIGH);
       // モータをステップ数steps回だけ回転させる（200ステップで一周）
-      for (int i = 0; i < steps; i++) {
-        digitalWrite(STEP_R, HIGH);
-        delayMicroseconds(20000);
-        digitalWrite(STEP_R, LOW);
-        delayMicroseconds(20000);
-      }
+      SteppingMotor::rotateMotorOneStepInDirection(SteppingMotorSide::RIGHT);
       break;
   }
 }
