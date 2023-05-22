@@ -29,7 +29,7 @@ int MotorService::getMotorDataFromByte(Motor motor, char serial_data) {
 
 void MotorService::driveMotor(char serial_data) {
     // ステッピングモータ
-    this->stepping_motor.moveSteppingMotor(MotorService::getMotorDataFromByte(Motor::STEPPING, serial_data), 20);
+    this->stepping_motor.moveSteppingMotor(MotorService::getMotorDataFromByte(Motor::STEPPING, serial_data), 1);
     // サーボモータ
     this->servo_motor.moveServoMotor(MotorService::getMotorDataFromByte(Motor::SERVO, serial_data));
     // DCモータ

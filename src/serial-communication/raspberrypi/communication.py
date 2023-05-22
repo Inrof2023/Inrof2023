@@ -1,6 +1,7 @@
 import os
 import serial
 from typing import Tuple, Type
+from enum import Enum
 import unittest
 
 def concatenate_bit_sequences(DC_BIT: int, SERV_BIT: int, STEP_BIT: int) -> Type[bytes]:
@@ -60,35 +61,196 @@ def communicate_with_arduino() -> None:
         # 仮置き
         ###################
         DC_BIT = 0b1
-        SERV_BIT = 0b1
-        STEP_BIT = 0b001
+        SERV_BIT = 0b0
+        # STEP_BIT = 0b000
         ###################
+        STEP_BIT = determine_robot_motion_from_photoreflector(int(left), int(center_left), int(center_right), int(right))
+        
         serial_byte = concatenate_bit_sequences(DC_BIT, SERV_BIT, STEP_BIT)
         
         # データを送信
         ser.write(serial_byte)
         
         # デバッグ用
-        print("send: {}".format(ser.readline()))
+        # print("send: {}".format(ser.readline()))
         
     return
 
-def determine_robot_motion_from_photoreflector(left: float, center_left: float, center_right: float, right:float) -> None:
+# フォトリフテクタの閾値
+THRESHOLD: int = 300
+
+class LineType(Enum):
+    """
+    ラインの種類を表す
+    """
+    WHITE = 0,
+    BLACK = 1,
+    
+class SteppingMotorMotion(Enum):
+    """
+    左右のステッピングモータの動きを表す
+    """
+    STOP = 0b000,
+    FORWARD = 0b001,
+    BACKWARD = 0b010,
+    LEFTWARD = 0b011,
+    RIGHTWARD = 0b100,
+    LEFTBACK = 0b101,
+    RIGHTBACK = 0b110,
+
+class LineSensor:
+    """
+    ラインセンサの値を表す
+    
+    Attributes
+    ----------
+    left : Type[LineType]
+        左のセンサの白黒
+    center_left : Type[LineType]
+        左中央の白黒
+    center_right : Type[LineType]
+        右中央の白黒
+    right : Type[LineType]
+        右のセンサの白黒
+    
+    Parameters
+    ----------
+    left : int
+        左のセンサの値
+    center_left : int
+        左中央のセンサの値
+    center_right : int
+        右中央のセンサの値
+    right : int
+        右のセンサの値
+    """
+    def __init__(self, left: int, center_left: int, center_right: int, right: int) -> None:
+        self.left = self.set_color_type(left)
+        self.center_left = self.set_color_type(center_left)
+        self.center_right = self.set_color_type(center_right)
+        self.right = self.set_color_type(right)
+        pass
+    
+    def set_color_type(self, photo_reflector_value: int) -> Type[LineType]:
+        """
+        フォトリフレクタの値からラインの色を判定する
+        
+        Parameters
+        ----------
+        photo_reflector_value : int
+            フォトリフレクタの値
+        
+        Returns
+        -------
+        Type[LineType]
+            ラインの色を表す列挙型
+        """
+        if photo_reflector_value > THRESHOLD:
+            return LineType.WHITE
+        else:
+            return LineType.BLACK
+        
+    def __eq__(self, __value: Tuple[LineType, LineType, LineType, LineType]) -> bool:
+        """
+        フォトリフレクタの値が等しいかどうかを判定する
+        LineSensorのインスタンスと==で比較できる
+        
+        Parameters
+        ----------
+        __value : Tuple[LineType, LineType, LineType, LineType]
+            フォトリフレクタの値
+            
+        Returns
+        -------
+        bool
+            フォトリフレクタの値が等しいかどうか
+        """
+        return self.left == __value[0] and self.center_left == __value[1] and self.center_right == __value[2] and self.right == __value[3]
+
+def determine_robot_motion_from_photoreflector(left: int, center_left: int, center_right: int, right:int) -> int:
     """
     ロボットの動きをフォトリフレクタの値から決定する
     
     Parameters
     ----------
-    left : float
-    center_left : float
-    center_right : float
-    right : float
+    left : int
+    center_left : int
+    center_right : int
+    right : int
     
     Returns
     -------
-    None
+    int :
+        ロボットの動きを表すビット列
     """
+    
+    THRESHOLD = 300
+    
+    line_sensor = LineSensor(left, center_left, center_right, right)
+    
+    # フォトリフレクタの値から進む方向を決定
+    # とりあえず全パターンを列挙
+    
+    if line_sensor == (LineType.WHITE, LineType.WHITE, LineType.WHITE, LineType.WHITE):
+        # to do
+        # https://github.com/Inrof2023/Inrof2023/issues/45
+        return 0b000
+    elif line_sensor == (LineType.WHITE, LineType.WHITE, LineType.WHITE, LineType.BLACK):
+        return decode_to_serial_data(SteppingMotorMotion.LEFTWARD)
+    elif line_sensor == (LineType.WHITE, LineType.WHITE, LineType.BLACK, LineType.WHITE):
+        return decode_to_serial_data(SteppingMotorMotion.LEFTWARD)
+    elif line_sensor == (LineType.WHITE, LineType.WHITE, LineType.BLACK, LineType.BLACK):
+        return decode_to_serial_data(SteppingMotorMotion.LEFTWARD)
+    elif line_sensor == (LineType.WHITE, LineType.BLACK, LineType.WHITE, LineType.WHITE):
+        return decode_to_serial_data(SteppingMotorMotion.RIGHTWARD)
+    elif line_sensor == (LineType.WHITE, LineType.BLACK, LineType.WHITE, LineType.BLACK):
+        # ありえないパターン
+        return decode_to_serial_data(SteppingMotorMotion.LEFTWARD)
+    elif line_sensor == (LineType.WHITE, LineType.BLACK, LineType.BLACK, LineType.WHITE):
+        return decode_to_serial_data(SteppingMotorMotion.FORWARD)
+    elif line_sensor == (LineType.WHITE, LineType.BLACK, LineType.BLACK, LineType.BLACK):
+        return decode_to_serial_data(SteppingMotorMotion.LEFTWARD)
+    elif line_sensor == (LineType.BLACK, LineType.WHITE, LineType.WHITE, LineType.WHITE):
+        return decode_to_serial_data(SteppingMotorMotion.RIGHTWARD)
+    elif line_sensor == (LineType.BLACK, LineType.WHITE, LineType.WHITE, LineType.BLACK):
+        # 考えなくていいケース
+        return decode_to_serial_data(SteppingMotorMotion.FORWARD)
+    elif line_sensor == (LineType.BLACK, LineType.WHITE, LineType.BLACK, LineType.WHITE):
+        # 考えなくていいケース
+        return decode_to_serial_data(SteppingMotorMotion.FORWARD)
+    elif line_sensor == (LineType.BLACK, LineType.WHITE, LineType.BLACK, LineType.BLACK):
+        # 考えなくていいケース
+        return decode_to_serial_data(SteppingMotorMotion.FORWARD)
+    elif line_sensor == (LineType.BLACK, LineType.BLACK, LineType.WHITE, LineType.WHITE):
+        return decode_to_serial_data(SteppingMotorMotion.RIGHTWARD)
+    elif line_sensor == (LineType.BLACK, LineType.BLACK, LineType.WHITE, LineType.BLACK):
+        # 考えなくていいケース
+        return decode_to_serial_data(SteppingMotorMotion.FORWARD)
+    elif line_sensor == (LineType.BLACK, LineType.BLACK, LineType.BLACK, LineType.WHITE):
+        return decode_to_serial_data(SteppingMotorMotion.FORWARD)
+    elif line_sensor == (LineType.BLACK, LineType.BLACK, LineType.BLACK, LineType.BLACK):
+        return decode_to_serial_data(SteppingMotorMotion.FORWARD)
+    
+    # arduinoへそのデータを送信する
+    
     return
+
+def decode_to_serial_data(stepping_motor_motion: SteppingMotorMotion) -> int:
+    if stepping_motor_motion == SteppingMotorMotion.STOP:
+        return 0b000
+    elif stepping_motor_motion == SteppingMotorMotion.FORWARD:
+        return 0b001
+    elif stepping_motor_motion == SteppingMotorMotion.BACKWARD:
+        return 0b010
+    elif stepping_motor_motion == SteppingMotorMotion.LEFTWARD:
+        return 0b011
+    elif stepping_motor_motion == SteppingMotorMotion.RIGHTWARD:
+        return 0b100
+    elif stepping_motor_motion == SteppingMotorMotion.LEFTBACK:
+        return 0b101
+    elif stepping_motor_motion == SteppingMotorMotion.RIGHTBACK:
+        return 0b110
+    
 
 def determine_robot_motion_from_camera() -> None:
     """
@@ -118,10 +280,11 @@ class TestCommunication(unittest.TestCase):
 
 if __name__ == '__main__':
     # シリアル通信用のポートを環境変数に設定
-    os.environ['SERIAL_PORT'] = '/dev/ttyUSB0'
+    # os.environ['SERIAL_PORT'] = '/dev/ttyUSB0'
+    os.environ['SERIAL_PORT'] = '/dev/tty.usbserial-110'
     os.environ['BITRATE'] = '9600'
     
     # 単体テスト
-    unittest.main()
+    # unittest.main()
     
     communicate_with_arduino()
