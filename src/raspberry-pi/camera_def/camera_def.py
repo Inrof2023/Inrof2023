@@ -1,3 +1,4 @@
+from math import fabs
 import cv2
 import numpy as np
 import time
@@ -30,10 +31,10 @@ HEIGHT = 240
 # 球とみなす円形度
 THRES_CIRCULARITY = 0.75
 
-# 球を検出できる最大の距離
+# 球を検出できる最大の距離(judge-defと揃える)
 DETECTABLE_MAX_DIS = 1000
 
-def SetCamera(width, height):
+def set_camera(width, height):
     """
     Webカメラとcv2を使う準備
 
@@ -54,7 +55,7 @@ def SetCamera(width, height):
     return cap
 
 
-def FindTarget(frame):
+def find_target(frame):
     """
     一番近い球の座標，距離，色を取得する
 
@@ -75,14 +76,14 @@ def FindTarget(frame):
     r = np.zeros(3)
 
     # 二値画像の取得
-    (mask_red, mask_blue, mask_yellow) = Masking(frame)
+    (mask_red, mask_blue, mask_yellow) = masking(frame)
     
     for i, mask in enumerate([mask_red, mask_blue, mask_yellow]):
         # メディアンフィルタを適用する。
         mask = cv2.medianBlur(mask, ksize=5)
 
         # 色ごとに，最も近い球の座標と距離(とデバッグ用の半径)を取得
-        x[i], y[i], dis[i], r[i] = GetCoordinatesAndDistance(mask)
+        x[i], y[i], dis[i], r[i] = get_coordinates_and_distance(mask)
         # cv2.circle(frame,(int(x[i]),int(y[i])),int(r[i]),(0,255,0),2)   #デバッグ用　画面に円を表示する準備
     # cv2.imshow("frame", frame)   #デバッグ用　画面に表示
     # cv2.imshow("mask", mask_red + mask_blue + mask_yellow)   #デバッグ用　画面に表示
@@ -91,7 +92,7 @@ def FindTarget(frame):
     col = np.argmin(dis)
     return x[col], y[col], dis[col], col
 
-def Masking(frame):
+def masking(frame):
     """
     赤，青，黄でマスキングして二値画像を取得する
 
@@ -113,7 +114,7 @@ def Masking(frame):
     
     return (mask_red, mask_blue, mask_yellow)
 
-def GetCoordinatesAndDistance(mask):
+def get_coordinates_and_distance(mask):
     """
     二値画像から，距離が最も近い球の座標と距離を取得する
 
@@ -134,19 +135,19 @@ def GetCoordinatesAndDistance(mask):
         r = np.zeros(len(contours))
         for i, cnt in enumerate(contours):
             # 輪郭の円形度を計算する
-            cir = CalcCircularity(cnt)
+            cir = calc_circularity(cnt)
             if cir > THRES_CIRCULARITY:
                 # 外接円の座標と半径を取得
                 (x[i],y[i]),r[i] = cv2.minEnclosingCircle(cnt)
         # 最も半径の大きい球の配列番号を取得
         n = np.argmax(r)
         # 距離を計算
-        dis = CalcDistance(r[n])
+        dis = calc_distance(r[n])
         return x[n], y[n], dis, r[n]
     else:
         return 0, 0, DETECTABLE_MAX_DIS, 0
 
-def CalcCircularity(cnt):
+def calc_circularity(cnt):
     '''
     円形度を求める
 
@@ -170,7 +171,7 @@ def CalcCircularity(cnt):
         cir = 0
     return cir
 
-def CalcDistance(r):
+def calc_distance(r):
     """
     球の半径から距離を計算する
 
@@ -197,14 +198,14 @@ def CalcDistance(r):
 
 if __name__ == "__main__":
     # 使用例
-    cap = SetCamera(WIDTH, HEIGHT)
+    cap = set_camera(WIDTH, HEIGHT)
     start_time = time.time()
     # 決勝の競技時間+準備時間(12分)×トライ可能数(4回)×60秒
     while (time.time()-start_time<2880):
         # フレームをキャプチャ
         ret, frame = cap.read()
         # 色検出+輪郭検出
-        x, y, dis, col = FindTarget(frame)
+        x, y, dis, col = find_target(frame)
 
         # 小さすぎる円は球とみなさない(重要!)
         if dis < DETECTABLE_MAX_DIS:
