@@ -7,6 +7,6 @@ if __name__ == "__main__":
     tsushin.test()
 
     # 通信
-    tsushin.communicate()
+    # tsushin.communicate()
 
 
