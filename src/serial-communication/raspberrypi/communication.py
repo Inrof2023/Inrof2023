@@ -60,13 +60,15 @@ def communicate_with_arduino() -> None:
         # データをビット列に変換
         # 仮置き
         ###################
-        DC_BIT = 0b1
+        DC_BIT = 0b0
         SERV_BIT = 0b0
         # STEP_BIT = 0b000
         ###################
         STEP_BIT = determine_robot_motion_from_photoreflector(int(left), int(center_left), int(center_right), int(right))
         
         serial_byte = concatenate_bit_sequences(DC_BIT, SERV_BIT, STEP_BIT)
+        
+        print(serial_byte)
         
         # データを送信
         ser.write(serial_byte)
@@ -77,7 +79,7 @@ def communicate_with_arduino() -> None:
     return
 
 # フォトリフテクタの閾値
-THRESHOLD: int = 300
+THRESHOLD: int = 500
 
 class LineType(Enum):
     """
@@ -157,7 +159,7 @@ class LineSensor:
         
         Parameters
         ----------
-        __value : Tuple[LineType, LineType, LineType, LineType]
+        __value : Tuple[LineType, LineType, LineType, LineType
             フォトリフレクタの値
             
         Returns
@@ -184,52 +186,69 @@ def determine_robot_motion_from_photoreflector(left: int, center_left: int, cent
         ロボットの動きを表すビット列
     """
     
-    THRESHOLD = 300
-    
     line_sensor = LineSensor(left, center_left, center_right, right)
     
     # フォトリフレクタの値から進む方向を決定
     # とりあえず全パターンを列挙
     
-    if line_sensor == (LineType.WHITE, LineType.WHITE, LineType.WHITE, LineType.WHITE):
-        # to do
-        # https://github.com/Inrof2023/Inrof2023/issues/45
-        return 0b000
-    elif line_sensor == (LineType.WHITE, LineType.WHITE, LineType.WHITE, LineType.BLACK):
-        return decode_to_serial_data(SteppingMotorMotion.LEFTWARD)
-    elif line_sensor == (LineType.WHITE, LineType.WHITE, LineType.BLACK, LineType.WHITE):
-        return decode_to_serial_data(SteppingMotorMotion.LEFTWARD)
-    elif line_sensor == (LineType.WHITE, LineType.WHITE, LineType.BLACK, LineType.BLACK):
-        return decode_to_serial_data(SteppingMotorMotion.LEFTWARD)
-    elif line_sensor == (LineType.WHITE, LineType.BLACK, LineType.WHITE, LineType.WHITE):
+    if line_sensor == (LineType.BLACK, LineType.WHITE, LineType.WHITE, LineType.WHITE):
         return decode_to_serial_data(SteppingMotorMotion.RIGHTWARD)
-    elif line_sensor == (LineType.WHITE, LineType.BLACK, LineType.WHITE, LineType.BLACK):
-        # ありえないパターン
-        return decode_to_serial_data(SteppingMotorMotion.LEFTWARD)
-    elif line_sensor == (LineType.WHITE, LineType.BLACK, LineType.BLACK, LineType.WHITE):
-        return decode_to_serial_data(SteppingMotorMotion.FORWARD)
-    elif line_sensor == (LineType.WHITE, LineType.BLACK, LineType.BLACK, LineType.BLACK):
-        return decode_to_serial_data(SteppingMotorMotion.LEFTWARD)
-    elif line_sensor == (LineType.BLACK, LineType.WHITE, LineType.WHITE, LineType.WHITE):
-        return decode_to_serial_data(SteppingMotorMotion.RIGHTWARD)
-    elif line_sensor == (LineType.BLACK, LineType.WHITE, LineType.WHITE, LineType.BLACK):
-        # 考えなくていいケース
-        return decode_to_serial_data(SteppingMotorMotion.FORWARD)
-    elif line_sensor == (LineType.BLACK, LineType.WHITE, LineType.BLACK, LineType.WHITE):
-        # 考えなくていいケース
-        return decode_to_serial_data(SteppingMotorMotion.FORWARD)
-    elif line_sensor == (LineType.BLACK, LineType.WHITE, LineType.BLACK, LineType.BLACK):
-        # 考えなくていいケース
-        return decode_to_serial_data(SteppingMotorMotion.FORWARD)
     elif line_sensor == (LineType.BLACK, LineType.BLACK, LineType.WHITE, LineType.WHITE):
-        return decode_to_serial_data(SteppingMotorMotion.RIGHTWARD)
-    elif line_sensor == (LineType.BLACK, LineType.BLACK, LineType.WHITE, LineType.BLACK):
-        # 考えなくていいケース
-        return decode_to_serial_data(SteppingMotorMotion.FORWARD)
-    elif line_sensor == (LineType.BLACK, LineType.BLACK, LineType.BLACK, LineType.WHITE):
         return decode_to_serial_data(SteppingMotorMotion.FORWARD)
     elif line_sensor == (LineType.BLACK, LineType.BLACK, LineType.BLACK, LineType.BLACK):
         return decode_to_serial_data(SteppingMotorMotion.FORWARD)
+    elif line_sensor == (LineType.WHITE, LineType.BLACK, LineType.WHITE, LineType.WHITE):
+        return decode_to_serial_data(SteppingMotorMotion.FORWARD)
+    elif line_sensor == (LineType.WHITE, LineType.BLACK, LineType.BLACK, LineType.WHITE):
+        return decode_to_serial_data(SteppingMotorMotion.FORWARD)
+    elif line_sensor == (LineType.WHITE, LineType.WHITE, LineType.BLACK, LineType.WHITE):
+        return decode_to_serial_data(SteppingMotorMotion.FORWARD)
+    elif line_sensor == (LineType.WHITE, LineType.WHITE, LineType.BLACK, LineType.BLACK):
+        return decode_to_serial_data(SteppingMotorMotion.FORWARD)
+    elif line_sensor == (LineType.WHITE, LineType.WHITE, LineType.WHITE, LineType.BLACK):
+        return decode_to_serial_data(SteppingMotorMotion.LEFTWARD)
+    else:
+        return 0b000
+    
+    # if line_sensor == (LineType.WHITE, LineType.WHITE, LineType.WHITE, LineType.WHITE):
+    #     # to do
+    #     # https://github.com/Inrof2023/Inrof2023/issues/45
+    #     return 0b000
+    # elif line_sensor == (LineType.WHITE, LineType.WHITE, LineType.WHITE, LineType.BLACK):
+    #     return decode_to_serial_data(SteppingMotorMotion.LEFTWARD)
+    # elif line_sensor == (LineType.WHITE, LineType.WHITE, LineType.BLACK, LineType.WHITE):
+    #     return decode_to_serial_data(SteppingMotorMotion.LEFTWARD)
+    # elif line_sensor == (LineType.WHITE, LineType.WHITE, LineType.BLACK, LineType.BLACK):
+    #     return decode_to_serial_data(SteppingMotorMotion.LEFTWARD)
+    # elif line_sensor == (LineType.WHITE, LineType.BLACK, LineType.WHITE, LineType.WHITE):
+    #     return decode_to_serial_data(SteppingMotorMotion.RIGHTWARD)
+    # elif line_sensor == (LineType.WHITE, LineType.BLACK, LineType.WHITE, LineType.BLACK):
+    #     # ありえないパターン
+    #     return decode_to_serial_data(SteppingMotorMotion.LEFTWARD)
+    # elif line_sensor == (LineType.WHITE, LineType.BLACK, LineType.BLACK, LineType.WHITE):
+    #     return decode_to_serial_data(SteppingMotorMotion.FORWARD)
+    # elif line_sensor == (LineType.WHITE, LineType.BLACK, LineType.BLACK, LineType.BLACK):
+    #     return decode_to_serial_data(SteppingMotorMotion.LEFTWARD)
+    # elif line_sensor == (LineType.BLACK, LineType.WHITE, LineType.WHITE, LineType.WHITE):
+    #     return decode_to_serial_data(SteppingMotorMotion.RIGHTWARD)
+    # elif line_sensor == (LineType.BLACK, LineType.WHITE, LineType.WHITE, LineType.BLACK):
+    #     # 考えなくていいケース
+    #     return decode_to_serial_data(SteppingMotorMotion.FORWARD)
+    # elif line_sensor == (LineType.BLACK, LineType.WHITE, LineType.BLACK, LineType.WHITE):
+    #     # 考えなくていいケース
+    #     return decode_to_serial_data(SteppingMotorMotion.FORWARD)
+    # elif line_sensor == (LineType.BLACK, LineType.WHITE, LineType.BLACK, LineType.BLACK):
+    #     # 考えなくていいケース
+    #     return decode_to_serial_data(SteppingMotorMotion.FORWARD)
+    # elif line_sensor == (LineType.BLACK, LineType.BLACK, LineType.WHITE, LineType.WHITE):
+    #     return decode_to_serial_data(SteppingMotorMotion.RIGHTWARD)
+    # elif line_sensor == (LineType.BLACK, LineType.BLACK, LineType.WHITE, LineType.BLACK):
+    #     # 考えなくていいケース
+    #     return decode_to_serial_data(SteppingMotorMotion.FORWARD)
+    # elif line_sensor == (LineType.BLACK, LineType.BLACK, LineType.BLACK, LineType.WHITE):
+    #     return decode_to_serial_data(SteppingMotorMotion.FORWARD)
+    # elif line_sensor == (LineType.BLACK, LineType.BLACK, LineType.BLACK, LineType.BLACK):
+    #     return decode_to_serial_data(SteppingMotorMotion.FORWARD)
     
     # arduinoへそのデータを送信する
     
