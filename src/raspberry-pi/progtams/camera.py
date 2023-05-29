@@ -1,7 +1,33 @@
 from typing import Tuple
 import cv2
 import numpy as np
-from const import const_setting as CST
+
+# 赤い色の範囲を指定
+LOWER_R1 = np.array([0, 64, 20])
+UPPER_R1 = np.array([15, 255, 255])
+LOWER_R2= np.array([225, 64, 20])
+UPPER_R2 = np.array([255, 255, 255])
+
+# 青色の範囲を指定
+LOWER_B = np.array([130, 64, 20])
+UPPER_B = np.array([175, 255, 255])
+
+# 黄色の範囲を指定
+LOWER_Y = np.array([20, 64, 20])
+UPPER_Y = np.array([50, 255, 255])
+
+# 球の半径[mm]
+RADIUS = 32.5
+
+# 取得画像の解像度
+WIDTH = 320
+HEIGHT = 240
+
+# 球とみなす円形度
+THRES_CIRCULARITY = 0.75
+
+# 球を検出できる最大の距離
+DETECTABLE_MAX_DIS = 1000
 
 def set_camera(width: int, height: int):
     """
@@ -98,9 +124,9 @@ def masking(frame):
     # 画像をHSVに変換
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV_FULL)
     # 赤,青,黄色の範囲内の領域を抽出(二値化)
-    mask_red = cv2.inRange(hsv, CST.LOWER_R1, CST.UPPER_R1) + cv2.inRange(hsv, CST.LOWER_R2, CST.UPPER_R2)
-    mask_blue = cv2.inRange(hsv, CST.LOWER_B, CST.UPPER_B)
-    mask_yellow = cv2.inRange(hsv, CST.LOWER_Y, CST.UPPER_Y)
+    mask_red = cv2.inRange(hsv, LOWER_R1, UPPER_R1) + cv2.inRange(hsv, LOWER_R2, UPPER_R2)
+    mask_blue = cv2.inRange(hsv, LOWER_B, UPPER_B)
+    mask_yellow = cv2.inRange(hsv, LOWER_Y, UPPER_Y)
     
     return (mask_red, mask_blue, mask_yellow)
 
@@ -137,18 +163,18 @@ def get_coordinates_and_distance(mask) -> Tuple[float, float, float, float]:
         for i, cnt in enumerate(contours):
             # 輪郭の円形度を計算する
             cir = calc_circularity(cnt)
-            if cir > CST.THRES_CIRCULARITY:
+            if cir > THRES_CIRCULARITY:
                 # 外接円の座標と半径を取得
                 (x[i],y[i]),r[i] = cv2.minEnclosingCircle(cnt)
         # 最も半径の大きい球の配列番号を取得
         n = np.argmax(r)
         # 距離を計算
         dis = calc_distance(r[n])
-        if dis == np.inf or dis >= CST.DETECTABLE_MAX_DIS:
-            dis = CST.DETECTABLE_MAX_DIS
+        if dis == np.inf or dis >= DETECTABLE_MAX_DIS:
+            dis = DETECTABLE_MAX_DIS
         return x[n], y[n], dis, r[n]
     else:
-        return 0, 0, CST.DETECTABLE_MAX_DIS, 0
+        return 0, 0, DETECTABLE_MAX_DIS, 0
 
 def calc_circularity(cnt :np.ndarray) -> float:
     '''
@@ -190,7 +216,7 @@ def calc_distance(r :float) -> float:
     dis : float
         カメラから球までの距離[mm](キャリブレーションを用いた値)
     """
-    pxl = CST.HEIGHT
+    pxl = HEIGHT
     # y方向の焦点距離
     fy = 470
     # WebカメラのCMOSセンサー(1/4インチと仮定)の高さ[mm]
@@ -198,14 +224,14 @@ def calc_distance(r :float) -> float:
     try:
         r = r * camy / pxl
         fy = fy * camy / pxl
-        dis = CST.RADIUS *  fy / r
+        dis = RADIUS *  fy / r
     except ZeroDivisionError:
-        dis = CST.DETECTABLE_MAX_DIS
+        dis = DETECTABLE_MAX_DIS
     return dis
 
 class Camera:
     def __init__(self):
-        self.cap = set_camera(CST.WIDTH, CST.HEIGHT)
+        self.cap = set_camera(WIDTH, HEIGHT)
 
     def get_frame(self):
         # 使用例
