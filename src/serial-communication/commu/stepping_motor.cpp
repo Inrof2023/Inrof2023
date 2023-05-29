@@ -44,15 +44,6 @@ void SteppingMotor::rotateMotorByStepsInDirection(Direction dir, int steps) {
   // モータが回転する方向を設定している
   switch (dir) {
     case Direction::FORWARD:
-      digitalWrite(DIR_L, HIGH);
-      digitalWrite(DIR_R, LOW);
-      // モータをステップ数steps回だけ回転させる（200ステップで一周）
-      for (int i = 0; i < steps; i++) {
-        SteppingMotor::rotateMotorOneStepInDirection(SteppingMotorSide::LEFT);
-        SteppingMotor::rotateMotorOneStepInDirection(SteppingMotorSide::RIGHT);
-      }
-      break;
-    case Direction::BACKWARD:
       digitalWrite(DIR_L, LOW);
       digitalWrite(DIR_R, HIGH);
       // モータをステップ数steps回だけ回転させる（200ステップで一周）
@@ -61,8 +52,17 @@ void SteppingMotor::rotateMotorByStepsInDirection(Direction dir, int steps) {
         SteppingMotor::rotateMotorOneStepInDirection(SteppingMotorSide::RIGHT);
       }
       break;
-    case Direction::LEFTWORD:
+    case Direction::BACKWARD:
       digitalWrite(DIR_L, HIGH);
+      digitalWrite(DIR_R, LOW);
+      // モータをステップ数steps回だけ回転させる（200ステップで一周）
+      for (int i = 0; i < steps; i++) {
+        SteppingMotor::rotateMotorOneStepInDirection(SteppingMotorSide::LEFT);
+        SteppingMotor::rotateMotorOneStepInDirection(SteppingMotorSide::RIGHT);
+      }
+      break;
+    case Direction::LEFTWORD:
+      digitalWrite(DIR_L, LOW);
       // モータをステップ数steps回だけ回転させる（200ステップで一周）
       for (int i = 0; i < steps; i++) {
         SteppingMotor::rotateMotorOneStepInDirection(SteppingMotorSide::LEFT);
