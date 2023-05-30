@@ -27,6 +27,23 @@ int MotorService::getMotorDataFromByte(Motor motor, char serial_data) {
   }
 }
 
+// 1byteのデータから必要なバイトを取り出す
+int MotorService::getDataFromByte(BitData bit_data, char serial_data) {
+  switch (bit_data)
+  {
+    case BitData::STEPPING: // 後ろの4bitを取得する, ステッピングモータ
+      return serial_data & 0b00001111;
+    case BitData::SERVO: // 後ろから5bit目を取得する, サーボモータ
+      return serial_data & 0b00010000;
+    case BitData::DC: // 後ろから6bit目を取得する, DCモータ
+      return serial_data & 0b00100000;
+    case BitData::LINETRACE: // 後ろから7bit目を取得する, ライントレース
+      return serial_data & 0b01000000;
+    case BitData::Direction: // 後ろから8bit目を取得する, ライントレースをするときの方向
+      return serial_data & 0b10000000;
+  }
+}
+
 void MotorService::driveMotor(char serial_data) {
     // ステッピングモータ
     this->stepping_motor.moveSteppingMotor(MotorService::getMotorDataFromByte(Motor::STEPPING, serial_data), 1);

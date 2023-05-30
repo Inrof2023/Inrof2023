@@ -26,7 +26,7 @@ void CommunicationService::send() {
 
 // ラズパイへ送信
 DataReceiveResultObject CommunicationService::receive() {
-  if(Serial.available() > 0){ 
+  if(Serial.available() > 0){ // ノンブロッキング処理
       char data[BUFFER_SIZE];
       Serial.readBytes(data, BUFFER_SIZE);
 

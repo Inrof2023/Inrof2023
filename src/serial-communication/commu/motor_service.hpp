@@ -14,10 +14,22 @@ class MotorService {
             SERVO,
             DC
         };
+        enum class State {
+            LINETRACE,
+            CAMERA,
+        };
+        enum class BitData {
+            STEPPING, // 4bit
+            SERVO, // 1bit
+            DC, // 1bit
+            LINETRACE, // 1bit
+            Direction, // 1bit
+        };
         SteppingMotor stepping_motor;
         ServoMotor servo_motor;
         // DCMotor dc_motor;
         int getMotorDataFromByte(Motor motor, char serial_data);
+        int getDataFromByte(BitData bit_data, char serial_data);
 
     public:
         MotorService();
