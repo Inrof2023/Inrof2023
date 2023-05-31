@@ -65,6 +65,7 @@ MotorService::MotorService() {
     ServoMotor servo_motor;
     this->stepping_motor = stepping_motor;
     this->servo_motor = servo_motor;
+    this->motion_state = MotionState::LINETRACE;
 }
 
 void MotorService::setup() {
@@ -112,24 +113,39 @@ void MotorService::driveMotor(char serial_data) {
 
       // ライントレースする時の方向（前進、後退）を決定する
       // 割り込みする関数にも使うのでグローバル変数に代入する
-      
+      if (!MotorService::getDataFromByte(BitData::Direction, serial_data)) { // 0の時は前進
+        direction_for_line_trace = DirectionForLineTrace::Forward;
+      }
+      else { // 1の時は後退
+        direction_for_line_trace = DirectionForLineTrace::Backward;
+      }
 
       // StateがLINETRACEではない時（カメラからライントレースに切り替わる時）は割り込みを再開させる
       // StateがLINETRACEの時は何もしない
+      if (this->motion_state != MotionState::LINETRACE) {
+        // 割り込みを再開させる
+        MsTimer2::start();
+      }
 
       // StateをLINETRACEに変更
+      this->motion_state = MotionState::LINETRACE;
     }
     else {
       // カメラ
 
       // StateがLINETRACEの時は割り込みを停止させる
+      if (this->motion_state == MotionState::LINETRACE) {
+        MsTimer2::stop();
+      }
 
       // StateをCAMERAに変更
+      this->motion_state = MotionState::CAMERA;
 
       // ラズパイから送られてきたデータを元にロボットを動かす
+      this->stepping_motor.moveSteppingMotor(MotorService::getDataFromByte(BitData::STEPPING, serial_data), 1);
     }
     // ステッピングモータ
-    this->stepping_motor.moveSteppingMotor(MotorService::getDataFromByte(BitData::STEPPING, serial_data), 1);
+    // this->stepping_motor.moveSteppingMotor(MotorService::getDataFromByte(BitData::STEPPING, serial_data), 1);
     // サーボモータ
     this->servo_motor.moveServoMotor(MotorService::getDataFromByte(BitData::SERVO, serial_data));
     // DCモータ
