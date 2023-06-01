@@ -4,7 +4,7 @@ from typing import Tuple, Type
 from enum import Enum
 import unittest
 
-def concatenate_bit_sequences(DC_BIT: int, SERV_BIT: int, STEP_BIT: int) -> Type[bytes]:
+def concatenate_bit_sequences(Direction: int ,LINETRACE: int ,DC_BIT: int, SERV_BIT: int, STEP_BIT: int) -> Type[bytes]:
     """
     それぞれのモータの制御ビットを結合して, そのバイト列（1byte）を返す
     上から3bitは0パディングしている
@@ -33,7 +33,7 @@ def concatenate_bit_sequences(DC_BIT: int, SERV_BIT: int, STEP_BIT: int) -> Type
         それぞれのモータの制御ビットを結合したバイト列
     """
     # ビット列を結合
-    byte = DC_BIT << 4 | SERV_BIT << 3 | STEP_BIT
+    byte =  Direction << 7 | LINETRACE << 6 | DC_BIT << 5 | SERV_BIT << 4 | STEP_BIT
     
     # バイト列に変換
     byte = byte.to_bytes(1, 'big')
@@ -60,13 +60,15 @@ def communicate_with_arduino() -> None:
         # データをビット列に変換
         # 仮置き
         ###################
+        Direction = 0b0
+        LineTrace = 0b1
         DC_BIT = 0b0
         SERV_BIT = 0b0
-        # STEP_BIT = 0b000
+        STEP_BIT = 0b0000
         ###################
-        STEP_BIT = determine_robot_motion_from_photoreflector(int(left), int(center_left), int(center_right), int(right))
+        # STEP_BIT = determine_robot_motion_from_photoreflector(int(left), int(center_left), int(center_right), int(right))
         
-        serial_byte = concatenate_bit_sequences(DC_BIT, SERV_BIT, STEP_BIT)
+        serial_byte = concatenate_bit_sequences(Direction, LineTrace, DC_BIT, SERV_BIT, STEP_BIT)
         
         print(serial_byte)
         
