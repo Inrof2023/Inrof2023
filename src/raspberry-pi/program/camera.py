@@ -245,7 +245,7 @@ class Camera:
             # 終了処理
             self.cap.release()
             cv2.destroyAllWindows()   #デバッグ用　ウィンドウの終了
-        return (x, y, dis, col)
+        return x, y, dis, col
 
 """
 if __name__ == "__main__":

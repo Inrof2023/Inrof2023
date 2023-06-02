@@ -14,18 +14,26 @@ class Communication:
         #os.environ['SERIAL_PORT'] = '/dev/ttyUSB0'
         os.environ['SERIAL_PORT'] = 'COM5'
         os.environ['BITRATE'] = '9600'
-        self.ser = serial.Serial(os.environ['SERIAL_PORT'], int(os.environ['BITRATE']))
+        #self.ser = serial.Serial(os.environ['SERIAL_PORT'], int(os.environ['BITRATE']))
         self.ctrl = Controller()
-        self.ard_data = 0,0,0,0
-        self.serial_byte = 0b0, 0b0, 0b000
+        self.serial_byte = 0b0, 0b0, 0b0, 0b0, 0b0000
 
-    def concatenate_bit_sequences(self, DC_BIT: int, SERV_BIT: int, STEP_BIT: int) -> Type[bytes]:
+    def concatenate_bit_sequences(self, DIR_BIT: int, TRACE_BIT: int, DC_BIT: int, SERV_BIT: int, STEP_BIT: int) -> Type[bytes]:
         """
         それぞれのモータの制御ビットを結合して, そのバイト列（1byte）を返す
-        上から3bitは0パディングしている
     
         Parameters
         ----------
+        DIR_BIT: int
+            1bit
+            ライントレースをする時の向き
+            0: 前進, 1: 後進
+
+        TRACE_BIT: int
+            1bit
+            ライントレースをするかどうか
+            0: ライントレースしない(Raspberry Piが制御), 1: ライントレースする(Arduinoが制御)
+
         DC_BIT: int
             1bit
             DCモータの制御ビット
@@ -37,9 +45,9 @@ class Communication:
             0: 停止, 1: 動作
     
         STEP_BIT: int
-            3bit
+            4bit
             ステッピングモータの制御ビット
-            000: 停止, 001: 前進, 010: 後退, 011: 左回転, 100: 右回転　101: 左後回転, 110: 右後回転
+            0000: 停止, 0001: 前進, 0010: 後退, 0011: 左回転, 0100: 右回転　0101: 左後回転, 0110: 右後回転, 0111: 左旋回, 1000: 右旋回
         
         Returns
         -------
@@ -48,7 +56,7 @@ class Communication:
             それぞれのモータの制御ビットを結合したバイト列
         """
         # ビット列を結合
-        byte = DC_BIT << 4 | SERV_BIT << 3 | STEP_BIT
+        byte = DIR_BIT << 7 | TRACE_BIT << 6 | DC_BIT << 5 | SERV_BIT << 4 | STEP_BIT
     
         # バイト列に変換
         byte = byte.to_bytes(1, 'big')
@@ -61,16 +69,21 @@ class Communication:
         """
         start_time = time.time()
         while (time.time()-start_time<GAMETIME):
-            left, center_left, center_right, right = 10, 10, 10, 10
+            if(int(time.time()-start_time)%5==0):
+                left, center_left, center_right, right = 10, 10, 10, 10
+            else:
+                left, center_left, center_right, right = 10, 10, 10, 1000
+            
 
-            self.ard_data = left, center_left, center_right, right
-            DC_BIT, SERV_BIT, STEP_BIT = self.ctrl.controller(self.ard_data)
-            self.serial_byte = self.concatenate_bit_sequences(DC_BIT, SERV_BIT, STEP_BIT)
+            DIR_BIT, TRACE_BIT, DC_BIT, SERV_BIT, STEP_BIT = self.ctrl.controller(left, center_left, center_right, right)
+            self.serial_byte = self.concatenate_bit_sequences(DIR_BIT, TRACE_BIT, DC_BIT, SERV_BIT, STEP_BIT)
 
-            print("left, center_left, center_right, right : ", left, center_left, center_right, right)
+            print("left, center_left, center_right, right : ", int(left), int(center_left), int(center_right), int(right))
             print("next_state_num", self.ctrl.next_state_num)
-            print("DC_BIT, SERV_BIT, STEP_BIT", DC_BIT, SERV_BIT, STEP_BIT)
+            print("all_black_line_count", self.ctrl.all_black_line_count)
+            print("DIR_BIT, TRACE_BIT, DC_BIT, SERV_BIT, STEP_BIT", DIR_BIT, TRACE_BIT, DC_BIT, SERV_BIT, STEP_BIT)
             print("serial_byte : ", self.serial_byte)
+            time.sleep(0.05)
             os.system('cls')
 
     def communicate(self) -> None:
@@ -87,14 +100,13 @@ class Communication:
             except ValueError:
                 continue
 
-            self.ard_data = int(left), int(center_left), int(center_right), int(right)
-            DC_BIT, SERV_BIT, STEP_BIT = self.ctrl.controller(self.ard_data)
-            #self.serial_byte = self.concatenate_bit_sequences(DC_BIT, SERV_BIT, STEP_BIT)
-            self.serial_byte = self.concatenate_bit_sequences(0b0, 0b0, STEP_BIT)
+            DIR_BIT, TRACE_BIT, DC_BIT, SERV_BIT, STEP_BIT = self.ctrl.controller(int(left), int(center_left), int(center_right), int(right))
+            #self.serial_byte = self.concatenate_bit_sequences(DIR_BIT, TRACE_BIT, DC_BIT, SERV_BIT, STEP_BIT)
+            self.serial_byte = self.concatenate_bit_sequences(DIR_BIT, TRACE_BIT, 0b0, 0b0, STEP_BIT)
 
-            print("left, center_left, center_right, right : ", left, center_left, center_right, right)
+            print("left, center_left, center_right, right : ", int(left), int(center_left), int(center_right), int(right))
             print("next_state_num", self.ctrl.next_state_num)
-            print("DC_BIT, SERV_BIT, STEP_BIT", DC_BIT, SERV_BIT, STEP_BIT)
+            print("DIR_BIT, TRACE_BIT, DC_BIT, SERV_BIT, STEP_BIT", DIR_BIT, TRACE_BIT, DC_BIT, SERV_BIT, STEP_BIT)
             # print("serial_byte : ", self.serial_byte)
             #os.system('cls')
         
@@ -105,9 +117,7 @@ if __name__ == "__main__":
     com = Communication()
 
     # テスト
-    # com.test()
+    com.test()
 
     # 通信
-    com.communicate()
-
-
+    #com.communicate()
