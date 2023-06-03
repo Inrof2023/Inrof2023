@@ -11,9 +11,6 @@ void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
   MsTimer2::set(10, interrupt);
-  // ここは後で消す
-  MsTimer2::start();
-
   motor_controller_application.setup();
 }
 
