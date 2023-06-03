@@ -62,13 +62,18 @@ void interrupt(){
 // ###################################################################################################
 
 MotorService::MotorService() {
+    // それぞれのモータのインスタンスを作る
     SteppingMotor stepping_motor;
     ServoMotor servo_motor;
+    DcMotor dc_motor;
+
+    // インスタンスをクラスのメンバに格納する
     this->stepping_motor = stepping_motor;
     this->servo_motor = servo_motor;
+    this->dc_motor = dc_motor;
     // ここを後で変更する
-    // this->motion_state = MotionState::CAMERA;
-    this->motion_state = MotionState::LINETRACE;
+    this->motion_state = MotionState::CAMERA;
+    // this->motion_state = MotionState::LINETRACE;
 }
 
 void MotorService::setup() {
@@ -76,6 +81,7 @@ void MotorService::setup() {
     // モータのピンのセットアップとか
     this->stepping_motor.setup();
     this->servo_motor.setup();
+    this->dc_motor.setup();
 }
 
 // // 1byteのデータから必要なバイトを取り出す
@@ -152,5 +158,6 @@ void MotorService::driveMotor(char serial_data) {
     // サーボモータ
     this->servo_motor.moveServoMotor(MotorService::getDataFromByte(BitData::SERVO, serial_data));
     // DCモータ
+    this->dc_motor.moveDcMotor(MotorService::getDataFromByte(BitData::DC, serial_data));
     // this->dc_motor.moveDCMotor(MotorService::getMotorDataFromByte(Motor::DC, serial_data));
 }
