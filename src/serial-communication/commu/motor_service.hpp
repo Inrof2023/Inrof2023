@@ -6,7 +6,7 @@
 #include "constants.hpp"
 #include "stepping_motor.hpp"
 #include "servo_motor.hpp"
-// #include "dc_motor.hpp"
+#include "dc_motor.hpp"
 
 // フォトリフレクタのピン番号
 #define LEFT A0
@@ -38,6 +38,7 @@ class MotorService {
         };
         SteppingMotor stepping_motor;
         ServoMotor servo_motor;
+        DcMotor dc_motor;
         MotionState motion_state;
         // DCMotor dc_motor;
         // int getMotorDataFromByte(Motor motor, char serial_data);

@@ -7,9 +7,5 @@ void setup(){
 }
  
 void loop(){
- 
   digitalWrite(IN, HIGH); // HIGH LOWの組み合わせでモーター回転
-  // delay(100);
-  // digitalWrite(IN, LOW);
- 
 }
