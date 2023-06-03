@@ -33,5 +33,5 @@ void MotorControllerApplication::runMotorControlFlow() {
     }
 
     // 4. バッファを空にする
-    Serial.flush();
+    // Serial.flush();
 }

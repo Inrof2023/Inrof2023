@@ -21,7 +21,7 @@ float PID_FOR_LINE_TRACE_INTEGRAL = 0; // 偏差の積分値
 // グローバル変数を使いまくる
 void interrupt(){
   if (COUNT_STEPS_FOR_LINE_TRACE % 10 == 0) {
-    float sensor_val = (analogRead(LEFT) + analogRead(SENTER_L) - analogRead(SENTER_R) - analogRead(RIGHT)) / 2 / 1024.0;
+    float sensor_val = (analogRead(LEFT)*2 + analogRead(SENTER_L) - analogRead(SENTER_R) - analogRead(RIGHT)*2) / 2 / 1024.0;
     float pid_val = PID_FOR_LINE_TRACE_P * sensor_val + PID_FOR_LINE_TRACE_I * PID_FOR_LINE_TRACE_INTEGRAL + PID_FOR_LINE_TRACE_D * (sensor_val - PID_FOR_LINE_TRACE_PRESEN);
     if (pid_val > 100) pid_val = 100; // 最大値を超えないように
     if (-100 > pid_val) pid_val = -100;
@@ -29,6 +29,8 @@ void interrupt(){
     PID_FOR_LINE_TRACE_INTEGRAL += sensor_val;
     SPEED_LEFT_FOR_LINE_TRACE = 100 + pid_val;
     SPEED_RIGHT_FOR_LINE_TRACE = 100 - pid_val;
+    // SPEED_LEFT_FOR_LINE_TRACE = 100 - pid_val;
+    // SPEED_RIGHT_FOR_LINE_TRACE = 100 + pid_val;
   }
 
   // ライントレースする方向を指定
