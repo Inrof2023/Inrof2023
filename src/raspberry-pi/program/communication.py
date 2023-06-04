@@ -12,7 +12,7 @@ class Communication:
     def __init__(self):
         # シリアル通信用のポートを環境変数に設定
         #os.environ['SERIAL_PORT'] = '/dev/ttyUSB0'
-        os.environ['SERIAL_PORT'] = 'COM5'
+        os.environ['SERIAL_PORT'] = 'COM4'
         os.environ['BITRATE'] = '9600'
         #self.ser = serial.Serial(os.environ['SERIAL_PORT'], int(os.environ['BITRATE']))
         self.ctrl = Controller()
@@ -79,12 +79,12 @@ class Communication:
             self.serial_byte = self.concatenate_bit_sequences(DIR_BIT, TRACE_BIT, DC_BIT, SERV_BIT, STEP_BIT)
 
             print("left, center_left, center_right, right : ", int(left), int(center_left), int(center_right), int(right))
-            print("next_state_num", self.ctrl.next_state_num)
-            print("all_black_line_count", self.ctrl.all_black_line_count)
+            print("next_state", self.ctrl.next_state)
+            print("all_black_line_count", self.ctrl.rbst.all_black_line_count)
+            print("now_obtain_color", self.ctrl.rbst.now_obtain_color)
+            print("execute_instructure_count", self.ctrl.rbst.execute_instructure_count)
             print("DIR_BIT, TRACE_BIT, DC_BIT, SERV_BIT, STEP_BIT", DIR_BIT, TRACE_BIT, DC_BIT, SERV_BIT, STEP_BIT)
             print("serial_byte : ", self.serial_byte)
-            time.sleep(0.05)
-            os.system('cls')
 
     def communicate(self) -> None:
         """
@@ -105,13 +105,18 @@ class Communication:
             self.serial_byte = self.concatenate_bit_sequences(DIR_BIT, TRACE_BIT, 0b0, 0b0, STEP_BIT)
 
             print("left, center_left, center_right, right : ", int(left), int(center_left), int(center_right), int(right))
-            print("next_state_num", self.ctrl.next_state_num)
+            print("next_state", self.ctrl.next_state)
+            print("all_black_line_count", self.ctrl.rbst.all_black_line_count)
+            print("now_obtain_color", self.ctrl.rbst.now_obtain_color)
+            print("execute_instructure_count", self.ctrl.rbst.execute_instructure_count)
             print("DIR_BIT, TRACE_BIT, DC_BIT, SERV_BIT, STEP_BIT", DIR_BIT, TRACE_BIT, DC_BIT, SERV_BIT, STEP_BIT)
-            # print("serial_byte : ", self.serial_byte)
+            print("serial_byte : ", self.serial_byte)
             #os.system('cls')
         
             # データを送信
             self.ser.write(self.serial_byte)
+            self.ser.flush()
+            
 
 if __name__ == "__main__":
     com = Communication()
