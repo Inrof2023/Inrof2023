@@ -12,8 +12,14 @@
 enum class Direction {
   FORWARD,
   BACKWARD,
-  LEFTWORD,
-  RIGHTWORD
+  LEFT_WORD,
+  RIGHT_WORD,
+  LEFT_BACK_WORD,
+  RIGHT_BACK_WORD,
+  LEFT_HALF_FORWARD_ROTATION,
+  RIGHT_HALF_FORWARD_ROTATION,
+  LEFT_HALF_BACL_ROTATION,
+  RIGHT_HALF_BACL_ROTATION,
 };
 
 // ステッピングモータクラス
@@ -43,8 +49,11 @@ class SteppingMotor {
 
     void rotateMotorForwardBySteps(int steps); // 前進
     void rotateMotorBackwardBySteps(int steps); // 後退
-    void rotateMotorLeftwardBySteps(int steps); // 左回り
-    void rotateMotorRightwardBySteps(int steps); // 右回り
+    void rotateMotorLeftwardBySteps(int steps); // 左回り前
+    void rotateMotorRightwardBySteps(int steps); // 右回り前
+    void rotateMotorLeftBackBySteps(int steps); // 左回り後ろ
+    void rotateMotorRightBackBySteps(int steps); // 右回り後ろ
+    void rotateMotorOneRotation();
     void moveSteppingMotor(int sirial_data, int steps); // モーターを動かす
 };
 
