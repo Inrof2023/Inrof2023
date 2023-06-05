@@ -17,11 +17,15 @@ void CommunicationService::send() {
   // 内部のline_arrayに格納される
   CommunicationService::readPhotoReflectorValue();
 
+  String serial_data = "";
+
   for (int i = 0; i < LINE_ELEMENTS; i++ ){
-    Serial.print(this->line_array[i]);
-    if (i == LINE_ELEMENTS - 1) Serial.print("\n");
-    else Serial.print(",");
+    serial_data += (this->line_array[i]);
+    if (i == LINE_ELEMENTS - 1) serial_data += "\n";
+    else serial_data += ", ";
   }
+  Serial.print(serial_data);
+  Serial.flush();
 }
 
 // ラズパイへ送信

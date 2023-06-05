@@ -16,7 +16,7 @@
 
 #define PID_FOR_LINE_TRACE_P 70
 #define PID_FOR_LINE_TRACE_I 0
-#define PID_FOR_LINE_TRACE_D 1
+#define PID_FOR_LINE_TRACE_D 0
 
 class MotorService {
     private:

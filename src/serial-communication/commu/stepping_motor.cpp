@@ -15,13 +15,13 @@ void SteppingMotor::rotateMotorOneStepInDirection(SteppingMotorSide dir) {
   case SteppingMotorSide::LEFT:
     digitalWrite(this->STEP_L, HIGH);
     digitalWrite(this->STEP_L, LOW);
-    delay(20);
+    delay(10);
     /* code */
     break;
   case SteppingMotorSide::RIGHT:
     digitalWrite(this->STEP_R, HIGH);
     digitalWrite(this->STEP_R, LOW);
-    delay(20);
+    delay(10);
     break;
   }
 }
@@ -111,9 +111,9 @@ void SteppingMotor::rotateMotorRightBackBySteps(int steps) {
   SteppingMotor::rotateMotorByStepsInDirection(Direction::RIGHT_BACK_WORD, steps);
 }
 
-void SteppingMotor::rotateMotorOneRotation() {
-  SteppingMotor::
-}
+// void SteppingMotor::rotateMotorOneRotation() {
+//   SteppingMotor::
+// }
 
 void SteppingMotor::moveSteppingMotor(int sirial_data, int steps) {
   switch (sirial_data)
@@ -150,8 +150,10 @@ void SteppingMotor::moveSteppingMotor(int sirial_data, int steps) {
   case 0b1010: // 右旋回後ろ（半分）
     SteppingMotor::rotateMotorRightBackBySteps(230);
     break;
-  case 0b1011: // 方向転換, ここはテストする
-    SteppingMotor::rotateMotorLeftBackBySteps(450);
-    // ちょっと前に行くけどタイヤを真っ直ぐにしてからかなー
+  case 0b1011: // 方向転換, テストした
+    SteppingMotor::rotateMotorLeftBackBySteps(230);
+    SteppingMotor::rotateMotorForwardBySteps(150);
+    SteppingMotor::rotateMotorLeftBackBySteps(230);
+    SteppingMotor::rotateMotorBackwardBySteps(110);
   }
 }
