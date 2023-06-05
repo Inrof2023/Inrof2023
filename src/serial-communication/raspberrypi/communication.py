@@ -46,39 +46,53 @@ def communicate_with_arduino() -> None:
     """
     # シリアルポートを開く
     ser = serial.Serial(os.environ['SERIAL_PORT'], int(os.environ['BITRATE']))
-    
-    while True:
-        # データを受信
-        left, center_left, center_right, right = ser.readline().decode('utf-8', 'ignore').split(",") #バイト列で受信
-        print("photo lifter: {}, {}, {}, {}".format(left, center_left, center_right, right)) # デバッグ用
-        
-        # データを分ける
-        # 4bitのデータ（０, 1の文字列）を受信する, カンマ区切り
-        
-        # 色々処理する
-        
-        # データをビット列に変換
-        # 仮置き
-        ###################
+    try:
+        while True:
+            # データを受信
+            # left, center_left, center_right, right = ser.readline().decode('utf-8', 'ignore').split(",") #バイト列で受信
+            serial_data = ser.readline().decode("utf-8", "ignore")
+            print("デバッグ用：{}".format(serial_data))
+            left, center_left, center_right, right = serial_data.split(",") #バイト列で受信
+            print("photo lifter: {}, {}, {}, {}".format(left, center_left, center_right, right)) # デバッグ用
+            
+            # データを分ける
+            # 4bitのデータ（０, 1の文字列）を受信する, カンマ区切り
+            
+            # 色々処理する
+            
+            # データをビット列に変換
+            # 仮置き
+            ###################
+            Direction = 0b0
+            LineTrace = 0b0
+            DC_BIT = 0b0
+            SERV_BIT = 0b0
+            STEP_BIT = 0b0001
+            ###################
+            # STEP_BIT = determine_robot_motion_from_photoreflector(int(left), int(center_left), int(center_right), int(right))
+            
+            serial_byte = concatenate_bit_sequences(Direction, LineTrace, DC_BIT, SERV_BIT, STEP_BIT)
+            
+            # print(serial_byte)
+            
+            # データを送信
+            ser.write(serial_byte)
+            
+            ser.flush()
+            
+            # デバッグ用
+             # print("send: {}".format(ser.readline()))
+    except:
+        # 停止
         Direction = 0b0
-        LineTrace = 0b1
+        LineTrace = 0b0
         DC_BIT = 0b0
         SERV_BIT = 0b0
         STEP_BIT = 0b0000
-        ###################
-        # STEP_BIT = determine_robot_motion_from_photoreflector(int(left), int(center_left), int(center_right), int(right))
-        
         serial_byte = concatenate_bit_sequences(Direction, LineTrace, DC_BIT, SERV_BIT, STEP_BIT)
         
-        print(serial_byte)
-        
-        # データを送信
         ser.write(serial_byte)
-        
-        # デバッグ用
-        # print("send: {}".format(ser.readline()))
-        
-    return
+        ser.flush()
 
 # フォトリフテクタの閾値
 THRESHOLD: int = 500
