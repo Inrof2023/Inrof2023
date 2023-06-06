@@ -12,8 +12,8 @@
 #define DC_PIN 3 // DCモーターのピン番号
 
 #define SERVO_PIN 2 // サーボモーターのピン番号
-#define UP_ANGLE -5 // サーボモーターの上向きの角度
-#define DOWN_ANGLE 90 // サーボモーターの下向きの角度
+#define UP_ANGLE 90 // サーボモーターの上向きの角度
+#define DOWN_ANGLE 180 // サーボモーターの下向きの角度
 
 //ステッピングモーター左
 #define DIR_LEFT 4
