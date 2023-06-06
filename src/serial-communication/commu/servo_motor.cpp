@@ -12,7 +12,7 @@ void ServoMotor::setup() {
     // サーボモータのピンを出力に設定
     // pinMode(SERVO_PIN, OUTPUT);
     this->servo.attach(this->PIN);
-    this->servo.write(0); // 初期位置に戻す
+    this->servo.write(UP_ANGLE); // 初期位置に戻す
 }
 
 void ServoMotor::moveServoMotor(char serial_data) {

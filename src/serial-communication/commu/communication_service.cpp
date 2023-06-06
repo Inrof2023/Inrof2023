@@ -33,7 +33,7 @@ DataReceiveResultObject CommunicationService::receive() {
   if(Serial.available() > 0){ // ノンブロッキング処理
       char data[BUFFER_SIZE];
       Serial.readBytes(data, BUFFER_SIZE);
-
+      
       // デバッグ用
       // int received_data = data[0]; // ここがだいぶ怪しい
       return DataReceiveResultObject(true, data[0]);
