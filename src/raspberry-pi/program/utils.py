@@ -12,9 +12,8 @@ class State(Enum):
     SEARCH = 1,
     DETECT = 2,
     OBTAIN = 3,
-    REDO = 4,
-    GOBACK = 5,
-    GOAL = 6,
+    GOBACK = 4,
+    GOAL = 5,
 
 class SteppingMotorMotion(Enum):
     """
@@ -41,8 +40,8 @@ class ServoMotorMotion(Enum):
     """
     サーボモータの動きを表す
     """
-    OFF = 0b0,
-    ON = 0b1,
+    DOWN = 0b0,
+    UP = 0b1,
 
 class LineType(Enum):
     """
@@ -164,7 +163,7 @@ def decode_dc_motor_motion_to_serial_data(dc_motor_motion: DCMotorMotion) -> int
         return 0b1
 
 def decode_servo_motor_motion_to_serial_data(servo_motor_motion: ServoMotorMotion) -> int:
-    if servo_motor_motion == ServoMotorMotion.OFF:
+    if servo_motor_motion == ServoMotorMotion.DOWN:
         return 0b0
-    elif servo_motor_motion == ServoMotorMotion.ON:
+    elif servo_motor_motion == ServoMotorMotion.UP:
         return 0b1

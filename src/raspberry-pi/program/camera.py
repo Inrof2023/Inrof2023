@@ -1,20 +1,21 @@
 from typing import Tuple
 import cv2
 import numpy as np
+import subprocess
 
 # 赤い色の範囲を指定
-LOWER_R1 = np.array([0, 64, 20])
+LOWER_R1 = np.array([0, 64, 30])
 UPPER_R1 = np.array([15, 255, 255])
-LOWER_R2= np.array([225, 64, 20])
+LOWER_R2= np.array([225, 64, 30])
 UPPER_R2 = np.array([255, 255, 255])
 
 # 青色の範囲を指定
-LOWER_B = np.array([130, 64, 20])
+LOWER_B = np.array([130, 64, 40])
 UPPER_B = np.array([175, 255, 255])
 
 # 黄色の範囲を指定
-LOWER_Y = np.array([20, 64, 20])
-UPPER_Y = np.array([50, 255, 255])
+LOWER_Y = np.array([30, 64, 40])
+UPPER_Y = np.array([60, 255, 255])
 
 # 球の半径[mm]
 RADIUS = 32.5
@@ -47,9 +48,14 @@ def set_camera(width: int, height: int):
         cv2のビデオキャプチャ
     """
     # カメラの設定
+    #cap = cv2.VideoCapture(1)
     cap = cv2.VideoCapture(0)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+    
+    # v4l2-ctlを用いたホワイトバランスの固定
+    #cmd = 'v4l2-ctl -d /dev/video0 -c white_balance_automatic=0 -c white_balance_temperature=4500'
+    #ret = subprocess.check_output(cmd, shell=True)
 
     return cap
 
@@ -92,8 +98,8 @@ def find_target(frame) -> Tuple[int, int, int, int]:
         # 色ごとに，最も近い球の座標と距離(とデバッグ用の半径)を取得
         x[i], y[i], dis[i], r[i] = get_coordinates_and_distance(mask)
         cv2.circle(frame,(int(x[i]),int(y[i])),int(r[i]),(0,255,0),2)   #デバッグ用　画面に円を表示する準備
-    cv2.imshow("frame", frame)   #デバッグ用　画面に表示
-    cv2.imshow("mask", mask_red + mask_blue + mask_yellow)   #デバッグ用　画面に表示
+    #cv2.imshow("frame", frame)   #デバッグ用　画面に表示
+    #cv2.imshow("mask", mask_red + mask_blue + mask_yellow)   #デバッグ用　画面に表示
 
     # 最も近い球の色を取得する
     col = np.argmin(dis)
@@ -250,18 +256,15 @@ class Camera:
 """
 if __name__ == "__main__":
     # 使用例
-    cap = set_camera(CST.WIDTH, CST.HEIGHT)
-    start_time = time.time()
-    while (time.time()-start_time<CST.GAMETIME):
+    cap = set_camera(WIDTH, HEIGHT)
+    while True:
         # フレームをキャプチャ
         ret, frame = cap.read()
         # 色検出+輪郭検出
         x, y, dis, col = find_target(frame)
 
-        # 小さすぎる円は球とみなさない(重要!)
-        if dis < CST.DETECTABLE_MAX_DIS:
-            # デバッグ
-            # print("x:{}, y:{}, dis:{}, col:{}".format(x, y, dis, col), end=" ")
+        # デバッグ
+        print("x:{}, y:{}, dis:{}, col:{}".format(x, y, dis, col))
 
         # ESCキーで終了
         if cv2.waitKey(1) == 27:
@@ -270,4 +273,4 @@ if __name__ == "__main__":
     # 終了処理
     cap.release()
     cv2.destroyAllWindows()   #デバッグ用　ウィンドウの終了
-    """
+"""

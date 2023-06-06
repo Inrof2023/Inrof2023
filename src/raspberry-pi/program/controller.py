@@ -11,8 +11,7 @@ class Controller:
             SEARCH : ボールを探す
             DETECT : カメラ情報を基にボールに近づく
             OBTAIN : ボールを取る
-            REDO : detectの時の動きを遡っていく
-            GOBACK : 逆走でライントレースを行う
+            GOBACK : detectの時の動きを遡っていく
             GOAL : ゴールに球を入れる
         """
         self.next_state = State.LINETRACE
@@ -23,13 +22,13 @@ class Controller:
         now_state = self.next_state
         if now_state ==State.LINETRACE:
             dir_bit = 0b0
-            trace_bit = 0b1
-            self.next_state, dc_bit, serv_bit, step_bit = self.rbst.linetrace(left, center_left, center_right, right)
+            trace_bit = 0b0
+            self.next_state, dc_bit, serv_bit, step_bit = self.rbst.linetrace()
 
         elif now_state == State.SEARCH:
             x, y, dis, col = self.cam.get_frame()
             dir_bit = 0b0
-            trace_bit = 0b1
+            trace_bit = 0b0
             self.next_state, dc_bit, serv_bit, step_bit = self.rbst.search(dis)
 
         elif now_state == State.DETECT:
@@ -43,30 +42,14 @@ class Controller:
             trace_bit = 0b0
             self.next_state, dc_bit, serv_bit, step_bit = self.rbst.obtain()
 
-        elif now_state == State.REDO:
-            dir_bit = 0b1
-            trace_bit = 0b0
-            self.next_state, dc_bit, serv_bit, step_bit = self.rbst.redo()
-
         elif now_state == State.GOBACK:
-            dir_bit = 0b1
-            trace_bit = 0b1
-            self.next_state, dc_bit, serv_bit, step_bit = self.rbst.goback(left, center_left, center_right, right)
-        # 赤のボールをgoal
-        elif now_state == State.GOAL and self.rbst.now_obtain_color == 0:
             dir_bit = 0b0
             trace_bit = 0b0
-            self.next_state, dc_bit, serv_bit, step_bit = self.rbst.goal_red()
-        # 青のボールをgoal
-        elif now_state == State.GOAL and self.rbst.now_obtain_color == 1:
+            self.next_state, dc_bit, serv_bit, step_bit = self.rbst.goback()
+        if now_state == State.GOAL:
             dir_bit = 0b0
             trace_bit = 0b0
-            self.next_state, dc_bit, serv_bit, step_bit = self.rbst.goal_blue()
-        # 黄のボールをgoal
-        elif now_state == State.GOAL and self.rbst.now_obtain_color == 2:
-            dir_bit = 0b0
-            trace_bit = 0b0
-            self.next_state, dc_bit, serv_bit, step_bit = self.rbst.goal_yellow()
+            self.next_state, dc_bit, serv_bit, step_bit = self.rbst.goal()
 
         return dir_bit, trace_bit, dc_bit, serv_bit, step_bit
 
