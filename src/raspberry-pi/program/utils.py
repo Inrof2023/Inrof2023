@@ -33,8 +33,8 @@ class DCMotorMotion(Enum):
     """
     DCモータの動きを表す
     """
-    STOP = 0b0,
-    RUN = 0b1,
+    OFF = 0b0,
+    ON = 0b1,
 
 class ServoMotorMotion(Enum):
     """
@@ -42,6 +42,20 @@ class ServoMotorMotion(Enum):
     """
     DOWN = 0b0,
     UP = 0b1,
+
+class LinetraceDirection(Enum):
+    """
+    ライントレースをしている時の向きを表す
+    """
+    FOR = 0b0,
+    BACK = 0b1,
+
+class LinetraceMode(Enum):
+    """
+    ライントレースをするかどうかを表す
+    """
+    OFF = 0b0,
+    ON = 0b1,
 
 class LineType(Enum):
     """
@@ -157,13 +171,25 @@ def reverse_stepping_motor_motion(stepping_motor_motion: SteppingMotorMotion) ->
         return SteppingMotorMotion.STOP
 
 def decode_dc_motor_motion_to_serial_data(dc_motor_motion: DCMotorMotion) -> int:
-    if dc_motor_motion == DCMotorMotion.STOP:
+    if dc_motor_motion == DCMotorMotion.OFF:
         return 0b0
-    elif dc_motor_motion == DCMotorMotion.RUN:
+    elif dc_motor_motion == DCMotorMotion.ON:
         return 0b1
 
 def decode_servo_motor_motion_to_serial_data(servo_motor_motion: ServoMotorMotion) -> int:
     if servo_motor_motion == ServoMotorMotion.DOWN:
         return 0b0
     elif servo_motor_motion == ServoMotorMotion.UP:
+        return 0b1
+
+def decode_linetrace_direction_to_serial_data(linetrace_direction: LinetraceDirection) -> int:
+    if linetrace_direction == LinetraceDirection.FOR:
+        return 0b0
+    elif linetrace_direction == LinetraceDirection.BACK:
+        return 0b1
+
+def decode_linetrace_mode_to_serial_data(linetrace_mode: LinetraceMode) -> int:
+    if linetrace_mode == LinetraceMode.OFF:
+        return 0b0
+    elif linetrace_mode == LinetraceMode.ON:
         return 0b1

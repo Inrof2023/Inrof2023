@@ -52,6 +52,7 @@ def set_camera(width: int, height: int):
     cap = cv2.VideoCapture(0)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+    cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
     
     # v4l2-ctlを用いたホワイトバランスの固定
     #cmd = 'v4l2-ctl -d /dev/video0 -c white_balance_automatic=0 -c white_balance_temperature=4500'
@@ -98,8 +99,8 @@ def find_target(frame) -> Tuple[int, int, int, int]:
         # 色ごとに，最も近い球の座標と距離(とデバッグ用の半径)を取得
         x[i], y[i], dis[i], r[i] = get_coordinates_and_distance(mask)
         cv2.circle(frame,(int(x[i]),int(y[i])),int(r[i]),(0,255,0),2)   #デバッグ用　画面に円を表示する準備
-    #cv2.imshow("frame", frame)   #デバッグ用　画面に表示
-    #cv2.imshow("mask", mask_red + mask_blue + mask_yellow)   #デバッグ用　画面に表示
+    cv2.imshow("frame", frame)   #デバッグ用　画面に表示
+    cv2.imshow("mask", mask_red + mask_blue + mask_yellow)   #デバッグ用　画面に表示
 
     # 最も近い球の色を取得する
     col = np.argmin(dis)

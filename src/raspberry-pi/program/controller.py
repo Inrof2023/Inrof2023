@@ -20,36 +20,25 @@ class Controller:
 
     def controller(self, left: int, center_left: int, center_right: int, right: int) -> tuple[int, int, int, int, int]:
         now_state = self.next_state
+        self.rbst.detect_all_black_line(left, center_left, center_right, right)
         if now_state ==State.LINETRACE:
-            dir_bit = 0b0
-            trace_bit = 0b0
-            self.next_state, dc_bit, serv_bit, step_bit = self.rbst.linetrace()
+            self.next_state, dir_bit, trace_bit, dc_bit, serv_bit, step_bit = self.rbst.linetrace()
 
         elif now_state == State.SEARCH:
             x, y, dis, col = self.cam.get_frame()
-            dir_bit = 0b0
-            trace_bit = 0b0
-            self.next_state, dc_bit, serv_bit, step_bit = self.rbst.search(dis)
+            self.next_state, dir_bit, trace_bit, dc_bit, serv_bit, step_bit = self.rbst.search(dis)
 
         elif now_state == State.DETECT:
             x, y, dis, col = self.cam.get_frame()
-            dir_bit = 0b0
-            trace_bit = 0b0
-            self.next_state, dc_bit, serv_bit, step_bit = self.rbst.detect(x, y, dis, col)
+            self.next_state, dir_bit, trace_bit, dc_bit, serv_bit, step_bit = self.rbst.detect(x, y, dis, col)
 
         elif now_state == State.OBTAIN:
-            dir_bit = 0b0
-            trace_bit = 0b0
-            self.next_state, dc_bit, serv_bit, step_bit = self.rbst.obtain()
+            self.next_state, dir_bit, trace_bit, dc_bit, serv_bit, step_bit = self.rbst.obtain()
 
         elif now_state == State.GOBACK:
-            dir_bit = 0b0
-            trace_bit = 0b0
-            self.next_state, dc_bit, serv_bit, step_bit = self.rbst.goback()
+            self.next_state, dir_bit, trace_bit, dc_bit, serv_bit, step_bit = self.rbst.goback()
         if now_state == State.GOAL:
-            dir_bit = 0b0
-            trace_bit = 0b0
-            self.next_state, dc_bit, serv_bit, step_bit = self.rbst.goal()
+            self.next_state, dir_bit, trace_bit, dc_bit, serv_bit, step_bit = self.rbst.goal()
 
         return dir_bit, trace_bit, dc_bit, serv_bit, step_bit
 

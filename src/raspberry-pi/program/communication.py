@@ -77,15 +77,16 @@ class Communication:
 
             DIR_BIT, TRACE_BIT, DC_BIT, SERV_BIT, STEP_BIT = self.ctrl.controller(left, center_left, center_right, right)
             self.serial_byte = self.concatenate_bit_sequences(DIR_BIT, TRACE_BIT, DC_BIT, SERV_BIT, STEP_BIT)
-
+            print("**************************************************")
             print("left, center_left, center_right, right : ", int(left), int(center_left), int(center_right), int(right))
-            print("next_state", self.ctrl.next_state)
-            print("all_black_line_count", self.ctrl.rbst.all_black_line_count)
-            print("now_obtain_color", self.ctrl.rbst.now_obtain_color)
-            print("execute_instructure_count", self.ctrl.rbst.execute_instructure_count)
-            print("DIR_BIT, TRACE_BIT, DC_BIT, SERV_BIT, STEP_BIT", DIR_BIT, TRACE_BIT, DC_BIT, SERV_BIT, STEP_BIT)
+            print("DIR_BIT, TRACE_BIT, DC_BIT, SERV_BIT, STEP_BIT : ", DIR_BIT, TRACE_BIT, DC_BIT, SERV_BIT, STEP_BIT)
             print("serial_byte : ", self.serial_byte)
-
+            print("next_state : ", self.ctrl.next_state)
+            print("now_obtain_color : ", self.ctrl.rbst.now_obtain_color)
+            print("execute_instructure_count : ", self.ctrl.rbst.execute_instructure_count)
+            print("all_black_line_count : ", self.ctrl.rbst.all_black_line_count)
+            print("len(his) : ", len(self.ctrl.rbst.his))
+            print("**************************************************")
     def communicate(self) -> None:
         """
         ArduinoとRaspberry Piでシリアル通信
@@ -106,13 +107,15 @@ class Communication:
             DIR_BIT, TRACE_BIT, DC_BIT, SERV_BIT, STEP_BIT = self.ctrl.controller(left, center_left, center_right, right)
             self.serial_byte = self.concatenate_bit_sequences(DIR_BIT, TRACE_BIT, DC_BIT, SERV_BIT, STEP_BIT)
 
-            print("left, center_left, center_right, right : ", left, center_left, center_right, right)
-            print("next_state", self.ctrl.next_state)
-            print("all_black_line_count", self.ctrl.rbst.all_black_line_count)
-            print("now_obtain_color", self.ctrl.rbst.now_obtain_color)
-            print("execute_instructure_count", self.ctrl.rbst.execute_instructure_count)
-            print("DIR_BIT, TRACE_BIT, DC_BIT, SERV_BIT, STEP_BIT", DIR_BIT, TRACE_BIT, DC_BIT, SERV_BIT, STEP_BIT)
+            print("**************************************************")
+            print("left, center_left, center_right, right : ", int(left), int(center_left), int(center_right), int(right))
+            print("DIR_BIT, TRACE_BIT, DC_BIT, SERV_BIT, STEP_BIT : ", DIR_BIT, TRACE_BIT, DC_BIT, SERV_BIT, STEP_BIT)
             print("serial_byte : ", self.serial_byte)
+            print("next_state : ", self.ctrl.next_state)
+            print("now_obtain_color : ", self.ctrl.rbst.now_obtain_color)
+            print("all_black_line_count : ", self.ctrl.rbst.all_black_line_count)
+            print("len(his) : ", len(self.ctrl.rbst.his))
+            print("**************************************************")
         
             # データを送信
             self.ser.write(self.serial_byte)
