@@ -3,12 +3,6 @@ import cv2
 import numpy as np
 import subprocess
 
-# 赤い色の範囲を指定
-LOWER_R1 = np.array([0, 64, 30])
-UPPER_R1 = np.array([15, 255, 255])
-LOWER_R2= np.array([225, 64, 30])
-UPPER_R2 = np.array([255, 255, 255])
-
 # 青色の範囲を指定
 LOWER_B = np.array([130, 64, 40])
 UPPER_B = np.array([175, 255, 255])
@@ -16,6 +10,12 @@ UPPER_B = np.array([175, 255, 255])
 # 黄色の範囲を指定
 LOWER_Y = np.array([30, 64, 40])
 UPPER_Y = np.array([60, 255, 255])
+
+# 赤い色の範囲を指定
+LOWER_R1 = np.array([0, 64, 30])
+UPPER_R1 = np.array([15, 255, 255])
+LOWER_R2= np.array([225, 64, 30])
+UPPER_R2 = np.array([255, 255, 255])
 
 # 球の半径[mm]
 RADIUS = 32.5
@@ -48,8 +48,8 @@ def set_camera(width: int, height: int):
         cv2のビデオキャプチャ
     """
     # カメラの設定
-    #cap = cv2.VideoCapture(1)
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(1)
+    #cap = cv2.VideoCapture(0)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
     cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
@@ -82,7 +82,7 @@ def find_target(frame) -> Tuple[int, int, int, int]:
         球までの距離[mm](キャリブレーションを用いた値)
 
     col : int
-        球の色(0:赤, 1:青, 2:黄)
+        球の色(1:青, 2:黄, 3:赤)
     """
     x = np.zeros(3, dtype='float16')
     y = np.zeros(3, dtype='float16')
@@ -90,9 +90,9 @@ def find_target(frame) -> Tuple[int, int, int, int]:
     r = np.zeros(3, dtype='float16')
 
     # 二値画像の取得
-    (mask_red, mask_blue, mask_yellow) = masking(frame)
+    (mask_blue, mask_yellow, mask_red) = masking(frame)
     
-    for i, mask in enumerate([mask_red, mask_blue, mask_yellow]):
+    for i, mask in enumerate([mask_blue, mask_yellow, mask_red]):
         # メディアンフィルタを適用する。
         mask = cv2.medianBlur(mask, ksize=5)
 
@@ -100,15 +100,15 @@ def find_target(frame) -> Tuple[int, int, int, int]:
         x[i], y[i], dis[i], r[i] = get_coordinates_and_distance(mask)
         cv2.circle(frame,(int(x[i]),int(y[i])),int(r[i]),(0,255,0),2)   #デバッグ用　画面に円を表示する準備
     cv2.imshow("frame", frame)   #デバッグ用　画面に表示
-    cv2.imshow("mask", mask_red + mask_blue + mask_yellow)   #デバッグ用　画面に表示
+    cv2.imshow("mask", mask_blue + mask_yellow + mask_red)   #デバッグ用　画面に表示
 
     # 最も近い球の色を取得する
     col = np.argmin(dis)
-    return int(x[col]), int(y[col]), int(dis[col]), int(col)
+    return int(x[col]), int(y[col]), int(dis[col]), int(col+1)
 
 def masking(frame):
     """
-    赤，青，黄でマスキングして二値画像を取得する
+    青，黄，赤でマスキングして二値画像を取得する
 
     Parameters
     ----------
@@ -117,8 +117,6 @@ def masking(frame):
 
     Returns
     -------
-    mask_red : 
-        赤の二値画像
 
     mask_blue : 
         青の二値画像
@@ -126,16 +124,19 @@ def masking(frame):
     mask_yellow : 
         黄の二値画像
 
+    mask_red : 
+        赤の二値画像
+
     """
 
     # 画像をHSVに変換
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV_FULL)
-    # 赤,青,黄色の範囲内の領域を抽出(二値化)
-    mask_red = cv2.inRange(hsv, LOWER_R1, UPPER_R1) + cv2.inRange(hsv, LOWER_R2, UPPER_R2)
+    # 青,黄,赤の範囲内の領域を抽出(二値化)
     mask_blue = cv2.inRange(hsv, LOWER_B, UPPER_B)
     mask_yellow = cv2.inRange(hsv, LOWER_Y, UPPER_Y)
+    mask_red = cv2.inRange(hsv, LOWER_R1, UPPER_R1) + cv2.inRange(hsv, LOWER_R2, UPPER_R2)
     
-    return (mask_red, mask_blue, mask_yellow)
+    return (mask_blue, mask_yellow, mask_red)
 
 def get_coordinates_and_distance(mask) -> Tuple[float, float, float, float]:
     """

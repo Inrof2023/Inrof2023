@@ -8,12 +8,14 @@ class State(Enum):
     """
     ロボットの状態を表す
     """
-    LINETRACE = 0,
-    SEARCH = 1,
-    DETECT = 2,
-    OBTAIN = 3,
-    GOBACK = 4,
-    GOAL = 5,
+    READY = 0,
+    LINETRACE = 1,
+    SEARCH = 2,
+    DETECT = 3,
+    OBTAIN = 4,
+    GOBACK = 5,
+    LOOKBACK = 6,
+    GOAL = 7,
 
 class SteppingMotorMotion(Enum):
     """

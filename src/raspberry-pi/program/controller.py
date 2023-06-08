@@ -12,17 +12,22 @@ class Controller:
             DETECT : カメラ情報を基にボールに近づく
             OBTAIN : ボールを取る
             GOBACK : detectの時の動きを遡っていく
+            LOOKBACK : 180度方向転換する
             GOAL : ゴールに球を入れる
         """
-        self.next_state = State.LINETRACE
+        self.next_state = State.READY
         self.cam = Camera()
         self.rbst = RobotStatus()
 
     def controller(self, left: int, center_left: int, center_right: int, right: int) -> tuple[int, int, int, int, int]:
         now_state = self.next_state
-        self.rbst.detect_all_black_line(left, center_left, center_right, right)
-        if now_state ==State.LINETRACE:
-            self.next_state, dir_bit, trace_bit, dc_bit, serv_bit, step_bit = self.rbst.linetrace()
+        
+        if now_state ==State.READY:
+            self.next_state, dir_bit, trace_bit, dc_bit, serv_bit, step_bit = self.rbst.ready(left, center_left, center_right, right)
+
+
+        elif now_state ==State.LINETRACE:
+            self.next_state, dir_bit, trace_bit, dc_bit, serv_bit, step_bit = self.rbst.linetrace(left, center_left, center_right, right)
 
         elif now_state == State.SEARCH:
             x, y, dis, col = self.cam.get_frame()
@@ -36,8 +41,13 @@ class Controller:
             self.next_state, dir_bit, trace_bit, dc_bit, serv_bit, step_bit = self.rbst.obtain()
 
         elif now_state == State.GOBACK:
+            x, y, dis, col = self.cam.get_frame()
             self.next_state, dir_bit, trace_bit, dc_bit, serv_bit, step_bit = self.rbst.goback()
-        if now_state == State.GOAL:
+
+        elif now_state == State.LOOKBACK:
+            self.next_state, dir_bit, trace_bit, dc_bit, serv_bit, step_bit = self.rbst.lookback()
+
+        elif now_state == State.GOAL:
             self.next_state, dir_bit, trace_bit, dc_bit, serv_bit, step_bit = self.rbst.goal()
 
         return dir_bit, trace_bit, dc_bit, serv_bit, step_bit
@@ -61,7 +71,7 @@ class Controller:
                 球までの距離[mm](キャリブレーションを用いた値)
 
             col : int
-                球の色(0:赤, 1:青, 2:黄)
+                球の色(1:青, 2:黄, 3:赤)
 
         Arduinoから受け取った値
             left : int
