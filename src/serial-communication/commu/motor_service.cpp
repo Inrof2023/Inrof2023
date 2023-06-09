@@ -76,6 +76,7 @@ MotorService::MotorService() {
     // ここを後で変更する
     this->motion_state = MotionState::CAMERA;
     // this->motion_state = MotionState::LINETRACE;
+    // MsTimer2::start(); // 後で消す
 }
 
 void MotorService::setup() {
@@ -153,7 +154,7 @@ void MotorService::driveMotor(char serial_data) {
       this->motion_state = MotionState::CAMERA;
 
       // ラズパイから送られてきたデータを元にロボットを動かす
-      this->stepping_motor.moveSteppingMotor(MotorService::getDataFromByte(BitData::STEPPING, serial_data), 10);
+      this->stepping_motor.moveSteppingMotor(MotorService::getDataFromByte(BitData::STEPPING, serial_data), 1);
     }
     // ステッピングモータ
     // this->stepping_motor.moveSteppingMotor(MotorService::getDataFromByte(BitData::STEPPING, serial_data), 1);
