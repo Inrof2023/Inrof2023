@@ -32,6 +32,6 @@ void MotorControllerApplication::runMotorControlFlow() {
         // 受け取ったデータがなかったら何もしない
     }
 
-    // 4. バッファを空にする
+    // // 4. バッファを空にする
     // Serial.flush();
 }

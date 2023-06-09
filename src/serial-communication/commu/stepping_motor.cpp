@@ -15,13 +15,11 @@ void SteppingMotor::rotateMotorOneStepInDirection(SteppingMotorSide dir) {
   case SteppingMotorSide::LEFT:
     digitalWrite(this->STEP_L, HIGH);
     digitalWrite(this->STEP_L, LOW);
-    delay(10);
     /* code */
     break;
   case SteppingMotorSide::RIGHT:
     digitalWrite(this->STEP_R, HIGH);
     digitalWrite(this->STEP_R, LOW);
-    delay(10);
     break;
   }
 }
@@ -83,6 +81,34 @@ void SteppingMotor::rotateMotorByStepsInDirection(Direction dir, int steps) {
         SteppingMotor::rotateMotorOneStepInDirection(SteppingMotorSide::RIGHT);
       }
       break;
+    case Direction::LEFT_HALF_FORWARD_ROTATION:
+      digitalWrite(DIR_L, LOW);
+      for (int i = 0; i < steps; i++) {
+        SteppingMotor::rotateMotorOneStepInDirection(SteppingMotorSide::LEFT);
+        delay(20);
+      }
+      break;
+    case Direction::RIGHT_HALF_FORWARD_ROTATION:
+      digitalWrite(DIR_R, HIGH);
+      for (int i = 0; i < steps; i++) {
+        SteppingMotor::rotateMotorOneStepInDirection(SteppingMotorSide::RIGHT);
+        delay(20);
+      }
+      break;
+    case Direction::LEFT_HALF_BACK_ROTATION:
+      digitalWrite(DIR_L, HIGH);
+      for (int i = 0; i < steps; i++) {
+        SteppingMotor::rotateMotorOneStepInDirection(SteppingMotorSide::LEFT);
+        delay(20);
+      }
+      break;
+    case Direction::RIGHT_HALF_BACK_ROTATION:
+      digitalWrite(DIR_R, LOW);
+      for (int i = 0; i < steps; i++) {
+        SteppingMotor::rotateMotorOneStepInDirection(SteppingMotorSide::RIGHT);
+        delay(20);
+      }
+      break;
   }
 }
 
@@ -109,6 +135,35 @@ void SteppingMotor::rotateMotorLeftBackBySteps(int steps) {
 
 void SteppingMotor::rotateMotorRightBackBySteps(int steps) {
   SteppingMotor::rotateMotorByStepsInDirection(Direction::RIGHT_BACK_WORD, steps);
+}
+
+void SteppingMotor::rotateMotorLeftHalfForwardRotation() {
+  SteppingMotor::rotateMotorByStepsInDirection(Direction::LEFT_HALF_FORWARD_ROTATION, 230); // 230で大体半周
+}
+
+void SteppingMotor::rotateMotorRightHalfForwardRotation() {
+  SteppingMotor::rotateMotorByStepsInDirection(Direction::RIGHT_HALF_FORWARD_ROTATION, 230); // 230で大体半周
+}
+
+void SteppingMotor::rotateMotorLeftHalfBackRotation() {
+  SteppingMotor::rotateMotorByStepsInDirection(Direction::LEFT_HALF_BACK_ROTATION, 230); // 230で大体半周
+}
+
+void SteppingMotor::rotateMotorRightHalfBackRotation() {
+  SteppingMotor::rotateMotorByStepsInDirection(Direction::RIGHT_HALF_BACK_ROTATION, 230); // 230で大体半周
+}
+
+void SteppingMotor::rotateMotorChangeDirection() {
+  SteppingMotor::rotateMotorLeftHalfBackRotation();
+  for (int i = 0; i < 150; i++ ) {
+    SteppingMotor::rotateMotorForwardBySteps(1);
+    delay(20);
+  }
+  SteppingMotor::rotateMotorLeftHalfBackRotation();
+  for (int i = 0; i < 110; i++ ) {
+    SteppingMotor::rotateMotorBackwardBySteps(1);
+    delay(20);
+  }
 }
 
 // void SteppingMotor::rotateMotorOneRotation() {
@@ -139,21 +194,19 @@ void SteppingMotor::moveSteppingMotor(int sirial_data, int steps) {
     SteppingMotor::rotateMotorRightBackBySteps(steps);
     break;
   case 0b0111: // 左旋回前（半分）
-    SteppingMotor::rotateMotorLeftwardBySteps(230);
+    SteppingMotor::rotateMotorLeftHalfForwardRotation();
     break;
   case 0b1000: // 右旋回（半分）
-    SteppingMotor::rotateMotorRightwardBySteps(230);
+    // SteppingMotor::rotateMotorRightwardBySteps(230);
+    SteppingMotor::rotateMotorRightHalfForwardRotation();
     break;
   case 0b1001: // 左旋回後ろ（半分）
-    SteppingMotor::rotateMotorLeftBackBySteps(230);
+    SteppingMotor::rotateMotorLeftHalfBackRotation();
     break;
   case 0b1010: // 右旋回後ろ（半分）
-    SteppingMotor::rotateMotorRightBackBySteps(230);
+    SteppingMotor::rotateMotorRightHalfBackRotation();
     break;
   case 0b1011: // 方向転換, テストした
-    SteppingMotor::rotateMotorLeftBackBySteps(230);
-    SteppingMotor::rotateMotorForwardBySteps(150);
-    SteppingMotor::rotateMotorLeftBackBySteps(230);
-    SteppingMotor::rotateMotorBackwardBySteps(110);
+    SteppingMotor::rotateMotorChangeDirection();
   }
 }

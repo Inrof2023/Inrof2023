@@ -64,10 +64,10 @@ def communicate_with_arduino() -> None:
             # 仮置き
             ###################
             Direction = 0b0
-            LineTrace = 0b0
+            LineTrace = 0b1
             DC_BIT = 0b0
             SERV_BIT = 0b0
-            STEP_BIT = 0b0001
+            STEP_BIT = 0b0000
             ###################
             # STEP_BIT = determine_robot_motion_from_photoreflector(int(left), int(center_left), int(center_right), int(right))
             
