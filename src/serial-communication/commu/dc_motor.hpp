@@ -4,11 +4,7 @@
 #include "constants.hpp"
 #include <Arduino.h>
 
-<<<<<<< HEAD
 class DcMotor {
-=======
-class DCMotor {
->>>>>>> ab78753 (can communicate but this code must be refactoring)
     private:
         int PIN;
     public:
