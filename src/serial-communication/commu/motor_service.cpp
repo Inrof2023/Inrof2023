@@ -17,8 +17,11 @@ int COUNT_STEPS_FOR_LINE_TRACE = 0; // ステッピングモータのステッ�
 float PID_FOR_LINE_TRACE_PRESEN = 0; // 前回の偏差
 float PID_FOR_LINE_TRACE_INTEGRAL = 0; // 偏差の積分値
 
+float ACCELERATION_CONTROL = 0.0; // 加速度制御, 線形加速度
+
 // 割り込みで設定する関数
 // グローバル変数を使いまくる
+// PID制御
 void interrupt(){
   if (COUNT_STEPS_FOR_LINE_TRACE % 10 == 0) {
     float sensor_val = (analogRead(LEFT)*1.2 + analogRead(SENTER_L) - analogRead(SENTER_R) - analogRead(RIGHT)*1.2) / 2 / 1024.0;
@@ -27,8 +30,8 @@ void interrupt(){
     if (-100 > pid_val) pid_val = -100;
     PID_FOR_LINE_TRACE_PRESEN = sensor_val;
     PID_FOR_LINE_TRACE_INTEGRAL += sensor_val;
-    SPEED_LEFT_FOR_LINE_TRACE = 100 + pid_val;
-    SPEED_RIGHT_FOR_LINE_TRACE = 100 - pid_val;
+    SPEED_LEFT_FOR_LINE_TRACE = (int)((100 + pid_val) * ACCELERATION_CONTROL);
+    SPEED_RIGHT_FOR_LINE_TRACE = (int)((100 - pid_val) * ACCELERATION_CONTROL);
     // SPEED_LEFT_FOR_LINE_TRACE = 100 - pid_val;
     // SPEED_RIGHT_FOR_LINE_TRACE = 100 + pid_val;
   }
@@ -122,14 +125,21 @@ void MotorService::driveMotor(char serial_data) {
     // ロボットの制御方法（ライントレースまたはカメラ）を決定する
     if (MotorService::getDataFromByte(BitData::LINETRACE, serial_data)) {
       // ライントレース
+      // ここまでOK
+      // Serial.print("Hello");
 
       // ライントレースする時の方向（前進、後退）を決定する
       // 割り込みする関数にも使うのでグローバル変数に代入する
       if (!MotorService::getDataFromByte(BitData::Direction, serial_data)) { // 0の時は前進
         direction_for_line_trace = DirectionForLineTrace::Forward;
+        // ここまでOK
       }
       else { // 1の時は後退
         direction_for_line_trace = DirectionForLineTrace::Backward;
+      }
+
+      if (ACCELERATION_CONTROL < 1.0) {
+        ACCELERATION_CONTROL += 0.05; // ここは後で調節
       }
 
       // StateがLINETRACEではない時（カメラからライントレースに切り替わる時）は割り込みを再開させる
@@ -139,6 +149,11 @@ void MotorService::driveMotor(char serial_data) {
         MsTimer2::start();
       }
 
+      // Serial.print(SPEED_LEFT_FOR_LINE_TRACE);
+      // Serial.print(":");
+      // Serial.print(SPEED_RIGHT_FOR_LINE_TRACE);
+      // Serial.print(":");
+
       // StateをLINETRACEに変更
       this->motion_state = MotionState::LINETRACE;
     }
@@ -147,7 +162,8 @@ void MotorService::driveMotor(char serial_data) {
 
       // StateがLINETRACEの時は割り込みを停止させる
       if (this->motion_state == MotionState::LINETRACE) {
-        MsTimer2::stop();
+        MsTimer2::stop(); // 割り込みをストップする
+        ACCELERATION_CONTROL = 0.0; // 加速度をリセットする
       }
 
       // StateをCAMERAに変更
@@ -155,6 +171,7 @@ void MotorService::driveMotor(char serial_data) {
 
       // ラズパイから送られてきたデータを元にロボットを動かす
       this->stepping_motor.moveSteppingMotor(MotorService::getDataFromByte(BitData::STEPPING, serial_data), 1);
+      // Serial.print("Hello");
     }
     // ステッピングモータ
     // this->stepping_motor.moveSteppingMotor(MotorService::getDataFromByte(BitData::STEPPING, serial_data), 1);
