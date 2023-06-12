@@ -11,5 +11,10 @@
 ### モータの回転方法
 パルス信号を入力することで, モータが1ステップ回転する.
 
+### 使っているサーボモータ
+`MG996R` \
+データシート: https://akizukidenshi.com/catalog/g/gM-12534/ \
+動作電圧: 4.8V~6.6V
+
 ### 参考サイト
 https://iot.keicode.com/arduino/arduino-stepper-motor-a4988.php
