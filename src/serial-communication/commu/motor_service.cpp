@@ -26,14 +26,20 @@ void interrupt(){
   if (COUNT_STEPS_FOR_LINE_TRACE % 10 == 0) {
     float sensor_val = (analogRead(LEFT)*1.2 + analogRead(SENTER_L) - analogRead(SENTER_R) - analogRead(RIGHT)*1.2) / 2 / 1024.0;
     float pid_val = PID_FOR_LINE_TRACE_P * sensor_val + PID_FOR_LINE_TRACE_I * PID_FOR_LINE_TRACE_INTEGRAL + PID_FOR_LINE_TRACE_D * (sensor_val - PID_FOR_LINE_TRACE_PRESEN);
-    if (pid_val > 100) pid_val = 100; // 最大値を超えないように
-    if (-100 > pid_val) pid_val = -100;
+    if (pid_val > 50) pid_val = 50; // 最大値を超えないように
+    if (-50 > pid_val) pid_val = -50;
     PID_FOR_LINE_TRACE_PRESEN = sensor_val;
     PID_FOR_LINE_TRACE_INTEGRAL += sensor_val;
-    SPEED_LEFT_FOR_LINE_TRACE = (int)((100 + pid_val) * ACCELERATION_CONTROL);
-    SPEED_RIGHT_FOR_LINE_TRACE = (int)((100 - pid_val) * ACCELERATION_CONTROL);
-    // SPEED_LEFT_FOR_LINE_TRACE = 100 - pid_val;
-    // SPEED_RIGHT_FOR_LINE_TRACE = 100 + pid_val;
+    // SPEED_LEFT_FOR_LINE_TRACE = (int)((50 + pid_val) * ACCELERATION_CONTROL);
+    // SPEED_RIGHT_FOR_LINE_TRACE = (int)((50 - pid_val) * ACCELERATION_CONTROL);
+    SPEED_LEFT_FOR_LINE_TRACE = 50 + pid_val;
+    SPEED_RIGHT_FOR_LINE_TRACE = 50 - pid_val;
+    Serial.print(SPEED_LEFT_FOR_LINE_TRACE);
+    Serial.print(":");
+    Serial.print(SPEED_RIGHT_FOR_LINE_TRACE);
+    Serial.print(":");
+    // SPEED_LEFT_FOR_LINE_TRACE = 50 - pid_val;
+    // SPEED_RIGHT_FOR_LINE_TRACE = 50 + pid_val;
   }
 
   // ライントレースする方向を指定
