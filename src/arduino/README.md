@@ -67,3 +67,14 @@ Arduino IDEのincludeするところにカーソルを長くおくとファイ�
     "version": 4
 }
 ```
+
+### 色々な定格
+- サーボモータ \
+`MG996R` \
+データシート: https://akizukidenshi.com/catalog/g/gM-12534/ \
+動作電圧: 4.8V~6.6V
+- フォトリフレクタ \
+`ＴＰＲ－１０５Ｆ` \
+データシート: https://akizukidenshi.com/download/tpr-105f.pdf \
+動作電圧: 5V?
+
