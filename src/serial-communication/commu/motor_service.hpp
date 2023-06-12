@@ -14,9 +14,9 @@
 #define SENTER_R A2
 #define RIGHT A3
 
-#define PID_FOR_LINE_TRACE_P 70
+#define PID_FOR_LINE_TRACE_P 50
 #define PID_FOR_LINE_TRACE_I 0
-#define PID_FOR_LINE_TRACE_D 0
+#define PID_FOR_LINE_TRACE_D 1
 
 class MotorService {
     private:
