@@ -48,15 +48,15 @@ def set_camera(width: int, height: int):
         cv2のビデオキャプチャ
     """
     # カメラの設定
-    cap = cv2.VideoCapture(1)
-    #cap = cv2.VideoCapture(0)
+    #cap = cv2.VideoCapture(1)
+    cap = cv2.VideoCapture(0)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
     cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
     
     # v4l2-ctlを用いたホワイトバランスの固定
-    #cmd = 'v4l2-ctl -d /dev/video0 -c white_balance_automatic=0 -c white_balance_temperature=4500'
-    #ret = subprocess.check_output(cmd, shell=True)
+    cmd = 'v4l2-ctl -d /dev/video0 -c white_balance_automatic=0 -c white_balance_temperature=4500'
+    ret = subprocess.check_output(cmd, shell=True)
 
     return cap
 

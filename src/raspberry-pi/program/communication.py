@@ -12,8 +12,8 @@ GAMETIME = 2880
 class Communication:
     def __init__(self):
         # シリアル通信用のポートを環境変数に設定
-        #os.environ['SERIAL_PORT'] = '/dev/ttyUSB0'
-        os.environ['SERIAL_PORT'] = 'COM4'
+        os.environ['SERIAL_PORT'] = '/dev/ttyUSB0'
+        #os.environ['SERIAL_PORT'] = 'COM4'
         os.environ['BITRATE'] = '9600'
         self.ser = serial.Serial(os.environ['SERIAL_PORT'], int(os.environ['BITRATE']))
         self.ctrl = Controller()
@@ -48,7 +48,8 @@ class Communication:
         STEP_BIT: int
             4bit
             ステッピングモータの制御ビット
-            0000: 停止, 0001: 前進, 0010: 後退, 0011: 左回し, 0100: 右回し　0101: 左後ろ回し, 0110: 右後ろ回し, 0111: 左90回し, 1000: 右旋回
+            0000: 停止, 0001: 前進, 0010: 後退, 0011: 左回し, 0100: 右回し　0101: 左後ろ回し, 0110: 右後ろ回し, 
+            0111: 左90回し, 1000: 右90回し, 1001: 左後ろ90回し, 1010: 右後ろ90回し, 1011: 方向転換
         
         Returns
         -------
@@ -78,14 +79,19 @@ class Communication:
 
             DIR_BIT, TRACE_BIT, DC_BIT, SERV_BIT, STEP_BIT = self.ctrl.controller(left, center_left, center_right, right)
             self.serial_byte = self.concatenate_bit_sequences(DIR_BIT, TRACE_BIT, DC_BIT, SERV_BIT, STEP_BIT)
-            print("**************************************************")
             print("left, center_left, center_right, right : ", int(left), int(center_left), int(center_right), int(right))
             print("DIR_BIT, TRACE_BIT, DC_BIT, SERV_BIT, STEP_BIT : ", DIR_BIT, TRACE_BIT, DC_BIT, SERV_BIT, STEP_BIT)
             print("serial_byte : ", self.serial_byte)
             print("next_state : ", self.ctrl.next_state)
             print("now_obtain_color : ", self.ctrl.rbst.now_obtain_color)
-            print("execute_instructure_count : ", self.ctrl.rbst.execute_instructure_count)
+            print("last_all_black_line_flag : ", self.ctrl.rbst.last_all_black_line_flag)
             print("all_black_line_count : ", self.ctrl.rbst.all_black_line_count)
+            print("check_all_black_line_flag : ",self.ctrl.rbst.check_all_black_line_flag)
+            print("left_or_right : ", self.ctrl.rbst.left_or_right)
+            print("execute_count : ", self.ctrl.rbst.execute_count)
+            print("search_road_num : ", self.ctrl.rbst.search_road_num)
+            print("search_his_length : ", self.ctrl.rbst.search_his_length)
+            print("detect_missing_flag : ", self.ctrl.rbst.detect_missing_flag)
             print("len(his) : ", len(self.ctrl.rbst.his))
             print("**************************************************")
     def communicate(self) -> None:
@@ -117,11 +123,12 @@ class Communication:
             print("all_black_line_count : ", self.ctrl.rbst.all_black_line_count)
             print("check_all_black_line_flag : ",self.ctrl.rbst.check_all_black_line_flag)
             print("left_or_right : ", self.ctrl.rbst.left_or_right)
+            print("linetrace_next: ", self.ctrl.rbst.linetrace_next)
+            print("up_or_down : ", self.ctrl.rbst.up_or_down)
             print("execute_count : ", self.ctrl.rbst.execute_count)
+            print("freeball_goal_position_flag: ", self.ctrl.rbst.freeball_goal_position_flag)
             print("search_road_num : ", self.ctrl.rbst.search_road_num)
-            print("search_his_length : ", self.ctrl.rbst.search_his_length)
             print("detect_missing_flag : ", self.ctrl.rbst.detect_missing_flag)
-
             print("len(his) : ", len(self.ctrl.rbst.his))
             print("**************************************************")
             

@@ -9,13 +9,14 @@ class State(Enum):
     ロボットの状態を表す
     """
     READY = 0,
-    LINETRACE = 1,
-    SEARCH = 2,
-    DETECT = 3,
-    OBTAIN = 4,
-    GOBACK = 5,
-    LOOKBACK = 6,
-    GOAL = 7,
+    FREEBALL = 1,
+    LINETRACE = 2,
+    SEARCH = 3,
+    DETECT = 4,
+    OBTAIN = 5,
+    GOBACK = 6,
+    LOOKBACK = 7,
+    GOAL = 8,
 
 class SteppingMotorMotion(Enum):
     """
@@ -28,8 +29,11 @@ class SteppingMotorMotion(Enum):
     RIGHTWARD = 0b0100,
     LEFTBACK = 0b0101,
     RIGHTBACK = 0b0110,
-    LEFTROTATE = 0b0111,
-    RIGHTROTATE = 0b1000,
+    LEFTWARD90 = 0b0111,
+    RIGHTWARD90 = 0b1000,
+    LEFTBACK90 = 0b1001,
+    RIGHTBACK90 = 0b1010,
+    LOOKBACK = 0b1011,
 
 class DCMotorMotion(Enum):
     """
@@ -149,10 +153,16 @@ def decode_stepping_motor_motion_to_serial_data(stepping_motor_motion: SteppingM
         return 0b0101
     elif stepping_motor_motion == SteppingMotorMotion.RIGHTBACK:
         return 0b0110
-    elif stepping_motor_motion == SteppingMotorMotion.LEFTROTATE:
+    elif stepping_motor_motion == SteppingMotorMotion.LEFTWARD90:
         return 0b0111
-    elif stepping_motor_motion == SteppingMotorMotion.RIGHTROTATE:
+    elif stepping_motor_motion == SteppingMotorMotion.RIGHTWARD90:
         return 0b1000
+    elif stepping_motor_motion == SteppingMotorMotion.LEFTBACK90:
+        return 0b1001
+    elif stepping_motor_motion == SteppingMotorMotion.RIGHTBACK90:
+        return 0b1010
+    elif stepping_motor_motion == SteppingMotorMotion.LOOKBACK:
+        return 0b1011
 
 def reverse_stepping_motor_motion(stepping_motor_motion: SteppingMotorMotion) -> SteppingMotorMotion:
     if stepping_motor_motion == SteppingMotorMotion.STOP:
@@ -169,6 +179,16 @@ def reverse_stepping_motor_motion(stepping_motor_motion: SteppingMotorMotion) ->
         return SteppingMotorMotion.LEFTWARD
     elif stepping_motor_motion == SteppingMotorMotion.RIGHTBACK:
         return SteppingMotorMotion.RIGHTWARD
+    elif stepping_motor_motion == SteppingMotorMotion.LEFTWARD90:
+        return SteppingMotorMotion.LEFTBACK90
+    elif stepping_motor_motion == SteppingMotorMotion.RIGHTWARD90:
+        return SteppingMotorMotion.RIGHTBACK90
+    elif stepping_motor_motion == SteppingMotorMotion.LEFTBACK90:
+        return SteppingMotorMotion.LEFTWARD90
+    elif stepping_motor_motion == SteppingMotorMotion.RIGHTBACK90:
+        return SteppingMotorMotion.RIGHTWARD90
+    elif stepping_motor_motion == SteppingMotorMotion.LOOKBACK:
+        return SteppingMotorMotion.LOOKBACK
     else:
         return SteppingMotorMotion.STOP
 
