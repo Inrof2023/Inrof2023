@@ -82,6 +82,35 @@ Host raspberry-raspberry-pi
   IdentityFile ~/.ssh/id_ed25519%  
 ```
 
+### 有線LANでラズパイに接続
+有線LANをラズパイとパソコンに繋いで以下のコマンドを実行
+```
+ssh keigo@raspberrypi.local
+```
+keigoの部分はユーザ名に変える
+
+### SSHでGUIを使う
+X Window SystemであるXQuartzを立ち上げる
+```
+open -a XQuartz
+```
+※XQuartzをインストールしていなかったら次のコマンドを実行
+```
+brew cask install xquartz
+```
+オプションX, Yを指定してSSH接続
+```
+ssh -XY keigo@raspberrypi.local
+```
+`~/.ssh/config`に以下の項目を追加することで, オプションなしで実行できる
+```
+Host raspberry-raspberry-pi
+  HostName raspberrypi.local //ここをipアドレスに変更する
+  User raspberry
+  IdentityFile ~/.ssh/id_ed25519
+  ForwardX11 yes
+  ForwardX11Trusted yes
+```
 ### 参考サイト 
 - 全体の流れの参考 \
 https://qiita.com/nlog2n2/items/1d1358f6913249f3e186
@@ -91,3 +120,6 @@ https://hotsmmrblog.com/remote_vscode_to_raspberry_pi/
 
 - 謎警告の解説 \
 https://www.niandc.co.jp/tech/20150729_2464/
+
+- GUI環境 \
+https://qiita.com/loftkun/items/37340745f211ea5d7ece
