@@ -10,7 +10,7 @@ MotorControllerApplication motor_controller_application;
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
-  MsTimer2::set(10, interrupt);
+  MsTimer2::set(15, interrupt);
   motor_controller_application.setup();
 }
 
