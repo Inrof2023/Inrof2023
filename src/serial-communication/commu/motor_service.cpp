@@ -10,8 +10,8 @@ enum class DirectionForLineTrace {
 };
 
 DirectionForLineTrace direction_for_line_trace = DirectionForLineTrace::Forward; // ライントレースの方向
-int SPEED_LEFT_FOR_LINE_TRACE = 100; // 左のステッピングモータの速度（1秒間の回転数）, 200が最大, 0が最小（停止）
-int SPEED_RIGHT_FOR_LINE_TRACE = 100; // 右のステッピングモータの速度（一秒間の回転数）, 200が最大, 0が最小（停止）
+int SPEED_LEFT_FOR_LINE_TRACE = 33; // 左のステッピングモータの速度（1秒間の回転数）, 200が最大, 0が最小（停止）
+int SPEED_RIGHT_FOR_LINE_TRACE = 33; // 右のステッピングモータの速度（一秒間の回転数）, 200が最大, 0が最小（停止）
 int COUNT_STEPS_FOR_LINE_TRACE = 0; // ステッピングモータのステップ数をカウントする, 200が最大, 0が最小
 
 float PID_FOR_LINE_TRACE_PRESEN = 0; // 前回の偏差
@@ -26,48 +26,51 @@ void interrupt(){
   if (COUNT_STEPS_FOR_LINE_TRACE % 10 == 0) {
     float sensor_val = (analogRead(LEFT)*1.2 + analogRead(SENTER_L) - analogRead(SENTER_R) - analogRead(RIGHT)*1.2) / 2 / 1024.0;
     float pid_val = PID_FOR_LINE_TRACE_P * sensor_val + PID_FOR_LINE_TRACE_I * PID_FOR_LINE_TRACE_INTEGRAL + PID_FOR_LINE_TRACE_D * (sensor_val - PID_FOR_LINE_TRACE_PRESEN);
-    if (pid_val > 50) pid_val = 50; // 最大値を超えないように
-    if (-50 > pid_val) pid_val = -50;
+    if (pid_val > 33) pid_val = 33; // 最大値を超えないように
+    if (-33 > pid_val) pid_val = -33;
     PID_FOR_LINE_TRACE_PRESEN = sensor_val;
     PID_FOR_LINE_TRACE_INTEGRAL += sensor_val;
     // SPEED_LEFT_FOR_LINE_TRACE = (int)((50 + pid_val) * ACCELERATION_CONTROL);
     // SPEED_RIGHT_FOR_LINE_TRACE = (int)((50 - pid_val) * ACCELERATION_CONTROL);
-    SPEED_LEFT_FOR_LINE_TRACE = 50 + pid_val;
-    SPEED_RIGHT_FOR_LINE_TRACE = 50 - pid_val;
-    Serial.print(SPEED_LEFT_FOR_LINE_TRACE);
-    Serial.print(":");
-    Serial.print(SPEED_RIGHT_FOR_LINE_TRACE);
-    Serial.print(":");
+    SPEED_LEFT_FOR_LINE_TRACE = 33 + pid_val;
+    SPEED_RIGHT_FOR_LINE_TRACE = 33 - pid_val;
+    // Serial.print(SPEED_LEFT_FOR_LINE_TRACE);
+    // Serial.print(":");
+    // Serial.print(SPEED_RIGHT_FOR_LINE_TRACE);
+    // Serial.print(":");
     // SPEED_LEFT_FOR_LINE_TRACE = 50 - pid_val;
     // SPEED_RIGHT_FOR_LINE_TRACE = 50 + pid_val;
   }
+  
+  // // ライントレースする方向を指定
+  // switch (direction_for_line_trace)
+  // {
+  // case DirectionForLineTrace::Forward:
+  //   digitalWrite(DIR_LEFT, LOW);
+  //   digitalWrite(DIR_RIGHT, HIGH);
+  //   break;
+  // case DirectionForLineTrace::Backward:
+  //   digitalWrite(DIR_LEFT, HIGH);
+  //   digitalWrite(DIR_RIGHT, LOW);
+  // }
 
-  // ライントレースする方向を指定
-  switch (direction_for_line_trace)
-  {
-  case DirectionForLineTrace::Forward:
-    digitalWrite(DIR_LEFT, LOW);
-    digitalWrite(DIR_RIGHT, HIGH);
-    break;
-  case DirectionForLineTrace::Backward:
-    digitalWrite(DIR_LEFT, HIGH);
-    digitalWrite(DIR_RIGHT, LOW);
-  }
+  digitalWrite(DIR_LEFT, LOW);
+  digitalWrite(DIR_RIGHT, HIGH);
 
   // 左のモータを動かす
   // 200 / SPEED_LEFT_FOR_LINE_TRACE がパルスを出す周期
   // これがCOUNT_STEPS_FOR_LINE_TRACEの値を割り切れる時回転する
   // ここは改善の余地がある（パルス幅をもう少し小さくするとか？）
-  if(SPEED_LEFT_FOR_LINE_TRACE > 0 && COUNT_STEPS_FOR_LINE_TRACE % (200 / SPEED_LEFT_FOR_LINE_TRACE) == 0){
+  if(SPEED_LEFT_FOR_LINE_TRACE > 0 && COUNT_STEPS_FOR_LINE_TRACE % (66 / SPEED_LEFT_FOR_LINE_TRACE) == 0){
     digitalWrite(STEP_LEFT,HIGH);
     digitalWrite(STEP_LEFT,LOW);
   }
-  if(SPEED_LEFT_FOR_LINE_TRACE > 0 && COUNT_STEPS_FOR_LINE_TRACE % (200 / SPEED_RIGHT_FOR_LINE_TRACE) == 0){
+  if(SPEED_RIGHT_FOR_LINE_TRACE > 0 && COUNT_STEPS_FOR_LINE_TRACE % (66 / SPEED_RIGHT_FOR_LINE_TRACE) == 0){
     digitalWrite(STEP_RIGHT,HIGH);
     digitalWrite(STEP_RIGHT,LOW);
   }
 
-  COUNT_STEPS_FOR_LINE_TRACE = (COUNT_STEPS_FOR_LINE_TRACE + 1) % 200;
+  COUNT_STEPS_FOR_LINE_TRACE = (COUNT_STEPS_FOR_LINE_TRACE + 1) % 66;
 }
 
 // ###################################################################################################
