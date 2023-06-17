@@ -10,13 +10,14 @@ class State(Enum):
     """
     READY = 0,
     FREEBALL = 1,
-    LINETRACE = 2,
-    SEARCH = 3,
-    DETECT = 4,
-    OBTAIN = 5,
-    GOBACK = 6,
-    LOOKBACK = 7,
-    GOAL = 8,
+    LINETRACEREADY = 2,
+    LINETRACE = 3,
+    SEARCH = 4,
+    DETECT = 5,
+    OBTAIN = 6,
+    GOBACK = 7,
+    LOOKBACK = 8,
+    GOAL = 9,
 
 class SteppingMotorMotion(Enum):
     """
