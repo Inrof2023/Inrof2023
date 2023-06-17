@@ -28,6 +28,9 @@ class Controller:
 
         elif now_state ==State.FREEBALL:
             self.next_state, dir_bit, trace_bit, dc_bit, serv_bit, step_bit = self.rbst.freeball(left, center_left, center_right, right)
+            
+        elif now_state ==State.LINETRACEREADY:
+            self.next_state, dir_bit, trace_bit, dc_bit, serv_bit, step_bit = self.rbst.linetraceready(left, center_left, center_right, right)
 
         elif now_state ==State.LINETRACE:
             self.next_state, dir_bit, trace_bit, dc_bit, serv_bit, step_bit = self.rbst.linetrace(left, center_left, center_right, right)

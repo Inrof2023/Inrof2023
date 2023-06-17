@@ -4,10 +4,10 @@ from utils import *
 import time
 
 # 吸引可能な領域のx座標の最小値
-X_MIN = 110
+X_MIN = 100
 
 # 吸引可能な領域のx座標の最大値
-X_MAX = 210
+X_MAX = 220
 
 # 吸引可能な領域のy座標の最小値
 Y_MIN = 120
@@ -31,32 +31,32 @@ class AllBlackLineThres(Enum):
     AFTER_YELLOW = 6,
     AFTER_RED = 7,
 
-ALLBLACKLINE_COUNT_AND_NEXT = {AllBlackLineThres.TO_FREEBALL:[1, State.FREEBALL],
-                               AllBlackLineThres.TO_SEARCH:[2, State.SEARCH], 
-                               AllBlackLineThres.TO_BLUE:[1, State.GOAL],
-                               AllBlackLineThres.TO_YELLOW:[1, State.GOAL],
-                               AllBlackLineThres.TO_RED:[1, State.GOAL],
-                               AllBlackLineThres.AFTER_BLUE:[1, State.SEARCH],
-                               AllBlackLineThres.AFTER_YELLOW:[1, State.SEARCH],
-                               AllBlackLineThres.AFTER_RED:[1, State.SEARCH]}
+ALLBLACKLINE_COUNT_AND_NEXT = {AllBlackLineThres.TO_FREEBALL:[2, State.FREEBALL],
+                               AllBlackLineThres.TO_SEARCH:[4, State.SEARCH], 
+                               AllBlackLineThres.TO_BLUE:[2, State.GOAL],
+                               AllBlackLineThres.TO_YELLOW:[3, State.GOAL],
+                               AllBlackLineThres.TO_RED:[4, State.GOAL],
+                               AllBlackLineThres.AFTER_BLUE:[2, State.SEARCH],
+                               AllBlackLineThres.AFTER_YELLOW:[3, State.SEARCH],
+                               AllBlackLineThres.AFTER_RED:[4, State.SEARCH]}
 
 # DETECT中にボールを見失ったとみなすボール追跡実行回数
-DETECT_HIS_LENGTH_LIMIT = 150
-
-# DCモータを動かす実行回数
-DC_STEP = 150
+DETECT_HIS_LENGTH_LIMIT = 250
 
 # サーボモータを動かす実行回数
-SV_STEP = 100
+SV_STEP = 50
 
 # DCモータを動かす実行回数
-DC_STEP = 150
+DC_STEP = 750
 
 # ステッピングモータで前進/後進する実行回数
-FB_STEP = 100
+FB_STEP = 15
+
+# ステッピングモータで前進/後進する実行回数
+FB_STEP_GOAL = 40
 
 # ステッピングモータで左/右前進する実行回数
-LR_STEP = 100
+LR_STEP = 200
 
 # ステッピングモータでBLUE GOAL前に前進する実行回数
 FB_STEP_BEFORE_BLUE_GOAL = 250
@@ -65,7 +65,7 @@ FB_STEP_BEFORE_BLUE_GOAL = 250
 FB_STEP_AFTER_BLUE_GOAL = 200
 
 # linetrace little前進/後進する実行回数
-FB_LITTLE_STEP = 40
+FB_LITTLE_STEP = 20
 
 # linetrace little前進/後進する実行回数(while camera using)
 FB_LITTLE_STEP_CAM_USING = 20
@@ -77,7 +77,7 @@ WAIT_STEP = 20
 ONE_STEP = 1
 
 # 黒い線かチェックするために左/右 前進する実行回数
-LR_STEP_TO_CHECK_ALL_BLACK_LINE = 10
+LR_STEP_TO_CHECK_ALL_BLACK_LINE = 5
 
 class RobotStatus:
     def __init__(self):
@@ -91,17 +91,17 @@ class RobotStatus:
         self.last_all_black_line_flag = False
         self.check_all_black_line_flag = False
         self.left_or_right = SteppingMotorMotion.STOP
-        self.up_or_down = ServoMotorMotion.DOWN
+        self.up_or_down = ServoMotorMotion.UP
         self.now_obtain_color = 0
         self.execute_count = 0
         self.freeball_goal_position_flag = False
-        self.search_road_num = 0
         self.detect_missing_flag = False
+        self.goal_count = 0
         self.instruction_steps = {State.READY:[],
                                   State.FREEBALL:[ONE_STEP,
                                                   ONE_STEP+SV_STEP,
                                                   ONE_STEP+SV_STEP+ONE_STEP,
-                                                  ONE_STEP+SV_STEP+ONE_STEP+FB_LITTLE_STEP],
+                                                  ONE_STEP+SV_STEP+ONE_STEP+FB_STEP],
                                   State.LINETRACE:[LR_STEP_TO_CHECK_ALL_BLACK_LINE],
                                   State.SEARCH:[LR_STEP,
                                                 LR_STEP+FB_STEP,
@@ -116,23 +116,24 @@ class RobotStatus:
                                                 ONE_STEP+DC_STEP, 
                                                 ONE_STEP+DC_STEP+SV_STEP],
                                   State.GOBACK:[],
-                                  State.LOOKBACK:[FB_LITTLE_STEP],
+                                  State.LOOKBACK:[FB_LITTLE_STEP,
+                                                  FB_LITTLE_STEP+ONE_STEP],
                                   State.GOAL: [[[]], #now_obtain_color=0 non instruction
-                                               [[ONE_STEP,SteppingMotorMotion.STOP],
-                                                [ONE_STEP+FB_STEP_BEFORE_BLUE_GOAL,SteppingMotorMotion.FORWARD],
-                                                [ONE_STEP+FB_STEP_BEFORE_BLUE_GOAL+DC_STEP,SteppingMotorMotion.STOP],
-                                                [ONE_STEP+FB_STEP_BEFORE_BLUE_GOAL+DC_STEP+ONE_STEP,SteppingMotorMotion.LOOKBACK],
-                                                [ONE_STEP+FB_STEP_BEFORE_BLUE_GOAL+DC_STEP+ONE_STEP+FB_STEP_AFTER_BLUE_GOAL,SteppingMotorMotion.FORWARD]],
-                                               [[ONE_STEP,SteppingMotorMotion.STOP],
-                                                [ONE_STEP+ONE_STEP,SteppingMotorMotion.LEFTWARD90],
-                                                [ONE_STEP+ONE_STEP+DC_STEP,SteppingMotorMotion.STOP],
-                                                [ONE_STEP+ONE_STEP+DC_STEP+ONE_STEP,SteppingMotorMotion.RIGHTBACK90],
-                                                [ONE_STEP+ONE_STEP+DC_STEP+ONE_STEP+WAIT_STEP,SteppingMotorMotion.STOP]],
-                                               [[ONE_STEP,SteppingMotorMotion.STOP],
-                                                [ONE_STEP+ONE_STEP,SteppingMotorMotion.LEFTWARD90],
-                                                [ONE_STEP+ONE_STEP+DC_STEP,SteppingMotorMotion.STOP],
-                                                [ONE_STEP+ONE_STEP+DC_STEP+ONE_STEP,SteppingMotorMotion.RIGHTBACK90],
-                                                [ONE_STEP+ONE_STEP+DC_STEP+ONE_STEP+FB_STEP,SteppingMotorMotion.FORWARD]]]}
+                                               [[ONE_STEP ,SteppingMotorMotion.STOP],
+                                                [ONE_STEP +FB_STEP_BEFORE_BLUE_GOAL,SteppingMotorMotion.FORWARD],
+                                                [ONE_STEP +FB_STEP_BEFORE_BLUE_GOAL+SV_STEP,SteppingMotorMotion.STOP],
+                                                [ONE_STEP +FB_STEP_BEFORE_BLUE_GOAL+SV_STEP+ONE_STEP,SteppingMotorMotion.LOOKBACK],
+                                                [ONE_STEP +FB_STEP_BEFORE_BLUE_GOAL+SV_STEP+ONE_STEP+FB_STEP_AFTER_BLUE_GOAL,SteppingMotorMotion.FORWARD]],
+                                               [[ONE_STEP ,SteppingMotorMotion.BACKWARD],
+                                                [ONE_STEP +ONE_STEP,SteppingMotorMotion.LEFTWARD90],
+                                                [ONE_STEP +ONE_STEP+SV_STEP,SteppingMotorMotion.STOP],
+                                                [ONE_STEP +ONE_STEP+SV_STEP+ONE_STEP,SteppingMotorMotion.RIGHTBACK90],
+                                                [ONE_STEP +ONE_STEP+SV_STEP+ONE_STEP+FB_STEP_GOAL,SteppingMotorMotion.FORWARD]],
+                                               [[ONE_STEP ,SteppingMotorMotion.BACKWARD],
+                                                [ONE_STEP +ONE_STEP,SteppingMotorMotion.LEFTWARD90],
+                                                [ONE_STEP +ONE_STEP+SV_STEP,SteppingMotorMotion.STOP],
+                                                [ONE_STEP +ONE_STEP+SV_STEP+ONE_STEP,SteppingMotorMotion.RIGHTBACK90],
+                                                [ONE_STEP +ONE_STEP+SV_STEP+ONE_STEP+FB_STEP_GOAL,SteppingMotorMotion.FORWARD]]]}
 
     def ready(self, left: int, center_left: int, center_right: int, right: int) -> tuple[State, int, int, int, int, int]:
         if left+center_left+center_right+right<2000:
@@ -198,7 +199,7 @@ class RobotStatus:
             dir_bit = decode_linetrace_direction_to_serial_data(LinetraceDirection.FOR)
             trace_bit = decode_linetrace_mode_to_serial_data(LinetraceMode.OFF)
             dc_bit = decode_dc_motor_motion_to_serial_data(DCMotorMotion.OFF)
-            serv_bit = decode_servo_motor_motion_to_serial_data(ServoMotorMotion.DOWN)
+            serv_bit = decode_servo_motor_motion_to_serial_data(ServoMotorMotion.UP)
             step_bit = decode_stepping_motor_motion_to_serial_data(SteppingMotorMotion.RIGHTBACK90)
         # forward
         elif self.freeball_goal_position_flag and self.execute_count<self.instruction_steps[State.FREEBALL][3]:
@@ -207,7 +208,7 @@ class RobotStatus:
             dir_bit = decode_linetrace_direction_to_serial_data(LinetraceDirection.FOR)
             trace_bit = decode_linetrace_mode_to_serial_data(LinetraceMode.OFF)
             dc_bit = decode_dc_motor_motion_to_serial_data(DCMotorMotion.OFF)
-            serv_bit = decode_servo_motor_motion_to_serial_data(ServoMotorMotion.DOWN)
+            serv_bit = decode_servo_motor_motion_to_serial_data(ServoMotorMotion.UP)
             step_bit = decode_stepping_motor_motion_to_serial_data(SteppingMotorMotion.FORWARD)
         # freeball -> linetrace
         elif self.freeball_goal_position_flag and self.execute_count>=self.instruction_steps[State.FREEBALL][3]:
@@ -215,11 +216,11 @@ class RobotStatus:
             self.all_black_line_count = 1
             self.freeball_goal_position_flag = False
             self.linetrace_next = AllBlackLineThres.TO_SEARCH
-            next_state = State.LINETRACE
+            next_state = State.LINETRACEREADY
             dir_bit = decode_linetrace_direction_to_serial_data(LinetraceDirection.FOR)
-            trace_bit = decode_linetrace_mode_to_serial_data(LinetraceMode.OFF)
+            trace_bit = decode_linetrace_mode_to_serial_data(LinetraceMode.ON)
             dc_bit = decode_dc_motor_motion_to_serial_data(DCMotorMotion.OFF)
-            serv_bit = decode_servo_motor_motion_to_serial_data(ServoMotorMotion.DOWN)
+            serv_bit = decode_servo_motor_motion_to_serial_data(ServoMotorMotion.UP)
             step_bit = decode_stepping_motor_motion_to_serial_data(SteppingMotorMotion.STOP)
         
         # 全部黒の線を超えたらカウントする
@@ -297,7 +298,16 @@ class RobotStatus:
             serv_bit = decode_servo_motor_motion_to_serial_data(ServoMotorMotion.UP)
             step_bit = decode_stepping_motor_motion_to_serial_data(SteppingMotorMotion.FORWARD)
 
-        return next_state, dir_bit, trace_bit, dc_bit, serv_bit, step_bit 
+        return next_state, dir_bit, trace_bit, dc_bit, serv_bit, step_bit
+    
+    def linetraceready(self, left: int, center_left: int, center_right: int, right: int) -> tuple[State, int, int, int, int, int]:
+        next_state = State.LINETRACE
+        dir_bit = decode_linetrace_direction_to_serial_data(LinetraceDirection.FOR)
+        trace_bit = decode_linetrace_mode_to_serial_data(LinetraceMode.ON)
+        dc_bit = decode_dc_motor_motion_to_serial_data(DCMotorMotion.OFF)
+        serv_bit = decode_servo_motor_motion_to_serial_data(self.up_or_down)
+        step_bit = decode_stepping_motor_motion_to_serial_data(SteppingMotorMotion.STOP)
+        return next_state, dir_bit, trace_bit, dc_bit, serv_bit, step_bit
 
     def linetrace(self, left: int, center_left: int, center_right: int, right: int) -> tuple[State, int, int, int, int, int]:
         """
@@ -499,7 +509,6 @@ class RobotStatus:
                 dc_bit = decode_dc_motor_motion_to_serial_data(DCMotorMotion.OFF)
                 serv_bit = decode_servo_motor_motion_to_serial_data(ServoMotorMotion.DOWN)
                 self.execute_count = 0
-                self.search_road_num += 1
                 next_state = State.SEARCH
         return next_state, dir_bit, trace_bit, dc_bit, serv_bit, step_bit
 
@@ -525,7 +534,6 @@ class RobotStatus:
             serv_bit = decode_servo_motor_motion_to_serial_data(ServoMotorMotion.DOWN)
             step_bit = decode_stepping_motor_motion_to_serial_data(SteppingMotorMotion.STOP)
             self.execute_count = 0
-            self.search_road_num = 0
             self.detect_missing_flag = False
         #　見失ったフラグがTrueで遡りきってない時DETECT中の履歴を遡る
         elif self.detect_missing_flag and len(self.his)!=0:
@@ -546,18 +554,21 @@ class RobotStatus:
             step_bit = decode_stepping_motor_motion_to_serial_data(SteppingMotorMotion.STOP)
             self.execute_count = 0
             self.detect_missing_flag = False
-        # ステッピングモータの履歴が長すぎたら見失ったフラグを立てる
+        # ステッピングモータの履歴が長すぎたらobtain
         elif len(self.his) >= DETECT_HIS_LENGTH_LIMIT:
-            next_state = State.DETECT
+            #self.now_obtain_color = col
+            next_state = State.OBTAIN
             dir_bit = decode_linetrace_direction_to_serial_data(LinetraceDirection.FOR)
             trace_bit = decode_linetrace_mode_to_serial_data(LinetraceMode.OFF)
             dc_bit = decode_dc_motor_motion_to_serial_data(DCMotorMotion.ON)
             serv_bit = decode_servo_motor_motion_to_serial_data(ServoMotorMotion.DOWN)
             step_bit = decode_stepping_motor_motion_to_serial_data(SteppingMotorMotion.STOP)
-            self.detect_missing_flag = True
+            self.execute_count = 0
+            self.detect_missing_flag = False
         # 右回転
         elif (x<X_MIN and dis < DETECTABLE_MAX_DIS):
             next_state = State.DETECT
+            self.now_obtain_color = col
             dir_bit = decode_linetrace_direction_to_serial_data(LinetraceDirection.FOR)
             trace_bit = decode_linetrace_mode_to_serial_data(LinetraceMode.OFF)
             dc_bit = decode_dc_motor_motion_to_serial_data(DCMotorMotion.ON)
@@ -569,6 +580,7 @@ class RobotStatus:
         # 左回転
         elif (x>=X_MAX and dis < DETECTABLE_MAX_DIS):
             next_state = State.DETECT
+            self.now_obtain_color = col
             dir_bit = decode_linetrace_direction_to_serial_data(LinetraceDirection.FOR)
             trace_bit = decode_linetrace_mode_to_serial_data(LinetraceMode.OFF)
             dc_bit = decode_dc_motor_motion_to_serial_data(DCMotorMotion.ON)
@@ -580,6 +592,7 @@ class RobotStatus:
         # 前進
         elif dis >= OBTAINABLE_MAX_DIS:
             next_state = State.DETECT
+            self.now_obtain_color = col
             dir_bit = decode_linetrace_direction_to_serial_data(LinetraceDirection.FOR)
             trace_bit = decode_linetrace_mode_to_serial_data(LinetraceMode.OFF)
             dc_bit = decode_dc_motor_motion_to_serial_data(DCMotorMotion.ON)
@@ -588,9 +601,21 @@ class RobotStatus:
             self.his.append(SteppingMotorMotion.FORWARD)
             self.execute_count += 1
             self.detect_missing_flag = False
+        # 
+        elif dis >= DETECTABLE_MAX_DIS:
+            next_state = State.DETECT
+            #self.now_obtain_color = col
+            dir_bit = decode_linetrace_direction_to_serial_data(LinetraceDirection.FOR)
+            trace_bit = decode_linetrace_mode_to_serial_data(LinetraceMode.OFF)
+            dc_bit = decode_dc_motor_motion_to_serial_data(DCMotorMotion.ON)
+            serv_bit = decode_servo_motor_motion_to_serial_data(ServoMotorMotion.DOWN)
+            step_bit = decode_stepping_motor_motion_to_serial_data(SteppingMotorMotion.STOP)
+            self.execute_count += 1
+            self.detect_missing_flag = True
         # forward
         else:
             next_state = State.DETECT
+            self.now_obtain_color = col
             dir_bit = decode_linetrace_direction_to_serial_data(LinetraceDirection.FOR)
             trace_bit = decode_linetrace_mode_to_serial_data(LinetraceMode.OFF)
             dc_bit = decode_dc_motor_motion_to_serial_data(DCMotorMotion.ON)
@@ -700,12 +725,13 @@ class RobotStatus:
             self.execute_count += 1
             next_state = State.LOOKBACK
         # 180 lookback
-        else:
+        elif self.execute_count < self.instruction_steps[State.LOOKBACK][1]:
             dir_bit = decode_linetrace_direction_to_serial_data(LinetraceDirection.FOR)
             trace_bit = decode_linetrace_mode_to_serial_data(LinetraceMode.OFF)
             dc_bit = decode_dc_motor_motion_to_serial_data(DCMotorMotion.OFF)
             serv_bit = decode_servo_motor_motion_to_serial_data(ServoMotorMotion.UP)
             step_bit = decode_stepping_motor_motion_to_serial_data(SteppingMotorMotion.LOOKBACK)
+            self.execute_count += 1
             if self.now_obtain_color == 1:
                 self.linetrace_next = AllBlackLineThres.TO_BLUE
             elif self.now_obtain_color == 2:
@@ -713,7 +739,16 @@ class RobotStatus:
             elif self.now_obtain_color == 3:
                 self.linetrace_next = AllBlackLineThres.TO_RED
             self.up_or_down = ServoMotorMotion.UP
-            next_state = State.LINETRACE
+        
+            next_state = State.LOOKBACK
+            
+        else:
+            dir_bit = decode_linetrace_direction_to_serial_data(LinetraceDirection.FOR)
+            trace_bit = decode_linetrace_mode_to_serial_data(LinetraceMode.ON)
+            dc_bit = decode_dc_motor_motion_to_serial_data(DCMotorMotion.OFF)
+            serv_bit = decode_servo_motor_motion_to_serial_data(ServoMotorMotion.UP)
+            step_bit = decode_stepping_motor_motion_to_serial_data(SteppingMotorMotion.STOP)
+            next_state = State.LINETRACEREADY
 
         return next_state, dir_bit, trace_bit, dc_bit, serv_bit, step_bit
 
@@ -728,6 +763,7 @@ class RobotStatus:
         Returns
         -------
         """
+        # 
         if self.execute_count < self.instruction_steps[State.GOAL][self.now_obtain_color][0][0]:
             dir_bit = decode_linetrace_direction_to_serial_data(LinetraceDirection.FOR)
             trace_bit = decode_linetrace_mode_to_serial_data(LinetraceMode.OFF)
@@ -763,7 +799,7 @@ class RobotStatus:
             step_bit = decode_stepping_motor_motion_to_serial_data(self.instruction_steps[State.GOAL][self.now_obtain_color][3][1])
             self.execute_count += 1
             next_state = State.GOAL
-        # 待機/forward
+        # forward
         elif self.execute_count < self.instruction_steps[State.GOAL][self.now_obtain_color][4][0]:
             dir_bit = decode_linetrace_direction_to_serial_data(LinetraceDirection.FOR)
             trace_bit = decode_linetrace_mode_to_serial_data(LinetraceMode.OFF)
@@ -774,7 +810,7 @@ class RobotStatus:
             next_state = State.GOAL
         else:
             dir_bit = decode_linetrace_direction_to_serial_data(LinetraceDirection.FOR)
-            trace_bit = decode_linetrace_mode_to_serial_data(LinetraceMode.OFF)
+            trace_bit = decode_linetrace_mode_to_serial_data(LinetraceMode.ON)
             dc_bit = decode_dc_motor_motion_to_serial_data(DCMotorMotion.OFF)
             serv_bit = decode_servo_motor_motion_to_serial_data(ServoMotorMotion.DOWN)
             step_bit = decode_stepping_motor_motion_to_serial_data(SteppingMotorMotion.STOP)
@@ -787,12 +823,13 @@ class RobotStatus:
                 self.all_black_line_count = 0
             elif self.now_obtain_color == 3:
                 self.linetrace_next = AllBlackLineThres.AFTER_RED
-                self.all_black_line_count = 1
+                self.all_black_line_count = 0
             else:
                 self.linetrace_next = AllBlackLineThres.TO_SEARCH
 
             self.now_obtain_color = 0
-            self.up_or_down = ServoMotorMotion.DOWN
-            next_state = State.LINETRACE
+            self.goal_count += 1
+            self.up_or_down = ServoMotorMotion.UP
+            next_state = State.LINETRACEREADY
 
         return next_state, dir_bit, trace_bit, dc_bit, serv_bit, step_bit

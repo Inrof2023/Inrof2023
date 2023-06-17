@@ -5,6 +5,7 @@ import os
 import serial
 from typing import Type
 from controller import Controller
+from utils import *
 
 # 決勝の競技時間+準備時間(12分)×トライ可能数(4回)×60秒
 GAMETIME = 2880
@@ -89,9 +90,7 @@ class Communication:
             print("check_all_black_line_flag : ",self.ctrl.rbst.check_all_black_line_flag)
             print("left_or_right : ", self.ctrl.rbst.left_or_right)
             print("execute_count : ", self.ctrl.rbst.execute_count)
-            print("search_road_num : ", self.ctrl.rbst.search_road_num)
             print("search_his_length : ", self.ctrl.rbst.search_his_length)
-            print("detect_missing_flag : ", self.ctrl.rbst.detect_missing_flag)
             print("len(his) : ", len(self.ctrl.rbst.his))
             print("**************************************************")
     def communicate(self) -> None:
@@ -127,14 +126,14 @@ class Communication:
             print("up_or_down : ", self.ctrl.rbst.up_or_down)
             print("execute_count : ", self.ctrl.rbst.execute_count)
             print("freeball_goal_position_flag: ", self.ctrl.rbst.freeball_goal_position_flag)
-            print("search_road_num : ", self.ctrl.rbst.search_road_num)
-            print("detect_missing_flag : ", self.ctrl.rbst.detect_missing_flag)
+            # print("search_road_num : ", self.ctrl.rbst.search_road_num)
             print("len(his) : ", len(self.ctrl.rbst.his))
             print("**************************************************")
             
         
             # データを送信
-            self.ser.write(self.serial_byte)
+            if self.ctrl.next_state != State.LINETRACE:
+                self.ser.write(self.serial_byte)
             self.ser.flush()
             
 
