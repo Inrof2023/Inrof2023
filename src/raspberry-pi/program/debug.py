@@ -65,8 +65,8 @@ def communicate_with_arduino() -> None:
             ###################
             Direction = 0b0
             LineTrace = 0b0
-            DC_BIT = 0b1
-            SERV_BIT = 0b1
+            DC_BIT = 0b0
+            SERV_BIT = 0b0
             STEP_BIT = 0b0000
             ###################
             # STEP_BIT = determine_robot_motion_from_photoreflector(int(left), int(center_left), int(center_right), int(right))
@@ -316,7 +316,7 @@ class TestCommunication(unittest.TestCase):
 if __name__ == '__main__':
     # シリアル通信用のポートを環境変数に設定
     # os.environ['SERIAL_PORT'] = '/dev/ttyUSB0'
-    os.environ['SERIAL_PORT'] = '/dev/tty.usbserial-110'
+    os.environ['SERIAL_PORT'] = '/dev/ttyUSB0'
     os.environ['BITRATE'] = '9600'
     
     # 単体テスト

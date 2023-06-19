@@ -94,6 +94,7 @@ class RobotStatus:
         self.up_or_down = ServoMotorMotion.UP
         self.now_obtain_color = 0
         self.execute_count = 0
+        self.search_execute_count = 0
         self.freeball_goal_position_flag = False
         self.detect_missing_flag = False
         self.goal_count = 0
@@ -416,13 +417,16 @@ class RobotStatus:
             -------
         """
         # 検出可能距離以内にボールを発見したらsearch -> detect
-        if dis<DETECTABLE_MAX_DIS:
+        if (not(self.execute_count >= self.instruction_steps[State.SEARCH][1] and self.execute_count < self.instruction_steps[State.SEARCH][2]) or\
+            not(self.execute_count >= self.instruction_steps[State.SEARCH][5] and self.execute_count < self.instruction_steps[State.SEARCH][6])) and\
+            dis<DETECTABLE_MAX_DIS:
             dir_bit = decode_linetrace_direction_to_serial_data(LinetraceDirection.FOR)
             trace_bit = decode_linetrace_mode_to_serial_data(LinetraceMode.OFF)
             step_bit = decode_stepping_motor_motion_to_serial_data(SteppingMotorMotion.STOP)
             dc_bit = decode_dc_motor_motion_to_serial_data(DCMotorMotion.OFF)
             serv_bit = decode_servo_motor_motion_to_serial_data(ServoMotorMotion.DOWN)
             self.execute_count = 0
+            self.search_execute_count = len(self.his)
             next_state = State.DETECT
         else:
             # 左前進 (search内で履歴を遡る際の終了位置その1)
@@ -527,6 +531,7 @@ class RobotStatus:
         # 範囲内にボールが来ていれば停止してdetect -> obtain
         if (x>X_MIN and x<X_MAX and y>Y_MIN and y<Y_MAX and dis<OBTAINABLE_MAX_DIS):
             self.now_obtain_color = col
+            self.search_execute_count = 0
             next_state = State.OBTAIN
             dir_bit = decode_linetrace_direction_to_serial_data(LinetraceDirection.FOR)
             trace_bit = decode_linetrace_mode_to_serial_data(LinetraceMode.OFF)
@@ -576,7 +581,6 @@ class RobotStatus:
             step_bit = decode_stepping_motor_motion_to_serial_data(SteppingMotorMotion.RIGHTWARD)
             self.his.append(SteppingMotorMotion.RIGHTWARD)
             self.execute_count += 1
-            self.detect_missing_flag = False
         # 左回転
         elif (x>=X_MAX and dis < DETECTABLE_MAX_DIS):
             next_state = State.DETECT
@@ -588,7 +592,17 @@ class RobotStatus:
             step_bit = decode_stepping_motor_motion_to_serial_data(SteppingMotorMotion.LEFTWARD)
             self.his.append(SteppingMotorMotion.LEFTWARD)
             self.execute_count += 1
-            self.detect_missing_flag = False
+            """
+        elif dis >= DETECTABLE_MAX_DIS:
+            next_state = State.DETECT
+            dir_bit = decode_linetrace_direction_to_serial_data(LinetraceDirection.FOR)
+            trace_bit = decode_linetrace_mode_to_serial_data(LinetraceMode.OFF)
+            dc_bit = decode_dc_motor_motion_to_serial_data(DCMotorMotion.ON)
+            serv_bit = decode_servo_motor_motion_to_serial_data(ServoMotorMotion.DOWN)
+            step_bit = decode_stepping_motor_motion_to_serial_data(SteppingMotorMotion.FORWARD)
+            self.his.append(SteppingMotorMotion.FORWARD)
+            self.execute_count += 1
+            """
         # 前進
         elif dis >= OBTAINABLE_MAX_DIS:
             next_state = State.DETECT
@@ -624,7 +638,6 @@ class RobotStatus:
             self.his.append(SteppingMotorMotion.FORWARD)
             self.execute_count += 1
 
-    
         return next_state, dir_bit, trace_bit, dc_bit, serv_bit, step_bit
 
     def obtain(self) -> tuple[State, int, int, int, int, int]:
