@@ -41,6 +41,9 @@ void interrupt(){
     // SPEED_LEFT_FOR_LINE_TRACE = 50 - pid_val;
     // SPEED_RIGHT_FOR_LINE_TRACE = 50 + pid_val;
   }
+
+  if (SPEED_LEFT_FOR_LINE_TRACE == 0) SPEED_LEFT_FOR_LINE_TRACE = 1;
+  if (SPEED_RIGHT_FOR_LINE_TRACE == 0) SPEED_RIGHT_FOR_LINE_TRACE = 1;
   
   // // ライントレースする方向を指定
   // switch (direction_for_line_trace)

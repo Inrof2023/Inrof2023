@@ -32,6 +32,9 @@ void CommunicationService::send() {
 DataReceiveResultObject CommunicationService::receive() {
   if(Serial.available() > 0){ // ノンブロッキング処理
       char data[BUFFER_SIZE];
+      // while(Serial.available() != 1) {
+      //   Serial.readBytes(data, BUFFER_SIZE);
+      // }
       Serial.readBytes(data, BUFFER_SIZE);
       
       // デバッグ用
